@@ -12,12 +12,9 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $guarded = ['status_role'];
+
+    public $timestamps = false;
+    protected $guarded = ['status_role','code','expire_at'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -25,8 +22,8 @@ class User extends Authenticatable implements JWTSubject
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'code',
+        'expire_at',
     ];
 
     /**
@@ -37,7 +34,6 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-
             'password' => 'hashed',
         ];
     }
@@ -61,4 +57,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+    public function generateCode(){
+        $this->timestamps=false;
+        $this->code=rand(100000,999999);
+        $this->expire_at=now()->addMinutes(15);
+        $this->save();
+    }
+
 }

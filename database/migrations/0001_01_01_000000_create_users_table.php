@@ -15,9 +15,12 @@ return new class extends Migration {
             $table->string('firstName');
             $table->string('lastName');
             $table->string('phone')->unique();
+            $table->string('email')->unique();
             $table->string('image_path')->default('null');
             $table->string('password');
             $table->string('status_role')->default('user');
+            $table->string('code')->default()->nullable();
+            $table->dateTime('expire_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

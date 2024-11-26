@@ -58,7 +58,7 @@ class UserController extends Controller
         ]);
         return response()->json(['message' => 'phone updated succseflly'], 200);
     }
-    public function updateImage(Request $request, $id)
+    public function updateImage(Request $request)
     {
         $validator = Validator::make(request()->all(), [
             'image_path' => 'required',
@@ -66,7 +66,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        $user = User::find($id);
+        $user = User::find(auth()->user()->id);
         if (!$user) {
             return response()->json(['message' => 'User not found'], 200);
         }
@@ -74,7 +74,7 @@ class UserController extends Controller
             'image_path' => $request->image_path
         ]);
         return response()->json(['message' => 'Image updated succseflly'], 200);
-    }// here we will complete it when we create 
+    }// here we will complete it when we create
     public function updatePassword(Request $request, $id)
     {
         $validator = Validator::make(request()->all(), [

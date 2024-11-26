@@ -3,24 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TowFactorMail;
 use App\Models\User;
-use Validator;
-
-
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+use PHPOpenSourceSaver\JwtAuth\Facades\JWTAuth;
 class AuthController extends Controller
 {
 
-    /**
-     * Register a User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
+
     public function register()
     {
         $validator = Validator::make(request()->all(), [
             'firstName' => 'required',
             'lastName' => 'required',
-            'phone' => 'required|size:13|starts_with:+,963|unique:users',
+            'phone' => 'required|size:12|starts_with:+,963|unique:users',
             'email'=>'required|email|unique:users',
             'password' => 'required|confirmed|min:8',
 
@@ -29,24 +26,22 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        if (request())
 
-            $user = new User;
+
+        $user = new User;
         $user->firstName = request()->firstName;
         $user->lastName = request()->lastName;
         $user->phone = request()->phone;
         $user->password = bcrypt(request()->password);
         $user->email=request()->email;
         $user->save();
-        return response()->json($user, 201);
+
+        $credentials = request(['phone', 'password']);
+        $token = auth()->attempt($credentials);
+        $user->generateCode();
+        Mail::to($user->email)->send(new TowFactorMail($user->code));
+        return response()->json(['user'=>$user,'token'=>$token], 201);
     }
-
-
-    /**
-     * Get a JWT via given credentials.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function login()
     {
         $credentials = request(['phone', 'password']);
@@ -90,13 +85,7 @@ class AuthController extends Controller
         return $this->respondWithToken(auth()->refresh());
     }
 
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
+
     protected function respondWithToken($token)
     {
         return response()->json([
@@ -104,5 +93,15 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 43200 // refresh in one month
         ]);
+    }
+    public function verify(){
+        $user=auth()->user();
+       if(request()->input('code')== $user->code){
+         $user->code=null;
+         $user->expire_at=null;
+         $user->save();
+        return response()->json(true);
+       }
+       return response()->json(false);
     }
 }
