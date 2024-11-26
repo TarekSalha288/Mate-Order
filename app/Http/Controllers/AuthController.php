@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetMail;
 use App\Mail\TowFactorMail;
 use App\Models\User;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use PHPOpenSourceSaver\JwtAuth\Facades\JWTAuth;
+
 class AuthController extends Controller
 {
 
@@ -104,4 +109,7 @@ class AuthController extends Controller
        }
        return response()->json(false);
     }
-}
+
+   }
+
+

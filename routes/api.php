@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Middleware\TowFactor;
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -20,6 +21,9 @@ Route::group([
 });
 Route::post('verify',[AuthController::class,'verify']);
 
+Route::post('password/request', [PasswordResetController::class, 'sendConfirmationEmail']);  // Send email
+Route::get('password/confirm/{token}', [PasswordResetController::class, 'confirmReset']); // Confirm password reset
+Route::post('password/reset/{token}', [PasswordResetController::class, 'resetPassword']);
 Route::group([
     'middleware' => [TowFactor::class,'api'],
 ], function ($router) {
