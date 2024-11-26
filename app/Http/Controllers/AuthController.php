@@ -21,6 +21,7 @@ class AuthController extends Controller
             'firstName' => 'required',
             'lastName' => 'required',
             'phone' => 'required|size:13|starts_with:+,963|unique:users',
+            'email'=>'required|email|unique:users',
             'password' => 'required|confirmed|min:8',
 
         ]);
@@ -35,6 +36,7 @@ class AuthController extends Controller
         $user->lastName = request()->lastName;
         $user->phone = request()->phone;
         $user->password = bcrypt(request()->password);
+        $user->email=request()->email;
         $user->save();
         return response()->json($user, 201);
     }
