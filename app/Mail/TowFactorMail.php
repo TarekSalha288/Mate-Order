@@ -17,9 +17,11 @@ class TowFactorMail extends Mailable
      * Create a new message instance.
      */
     private $code;
-    public function __construct($code)
+    private $name;
+    public function __construct($code,$name)
     {
         $this->code=$code;
+        $this->name=$name;
     }
 
 
@@ -37,7 +39,7 @@ class TowFactorMail extends Mailable
     {
         return new Content(
             view: 'otp',
-            with:['code'=>$this->code],
+            with:['code'=>$this->code,'name'=>$this->name],
         );
     }
 

@@ -37,7 +37,7 @@ class AuthController extends Controller
         $credentials = request(['phone', 'password']);
         $token = auth()->attempt($credentials);
         $user->generateCode();
-        Mail::to($user->email)->send(new TowFactorMail($user->code));
+        Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
         return response()->json(['user'=>$user,'token'=>$token], 201);
     }
     public function login()
