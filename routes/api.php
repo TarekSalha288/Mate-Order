@@ -21,15 +21,14 @@ Route::group([
 });
 Route::post('verify',[AuthController::class,'verify']);
 
-Route::post('password/request', [PasswordResetController::class, 'sendConfirmationEmail']);  // Send email
-Route::get('password/confirm/{token}', [PasswordResetController::class, 'confirmReset']); // Confirm password reset
-Route::post('password/reset/{token}', [PasswordResetController::class, 'resetPassword']);
+
 Route::group([
     'middleware' => [TowFactor::class,'api'],
 ], function ($router) {
-    Route::put('/updateFirstName', [UserController::class, 'updateFirstName']);
-    Route::put('/updateLastName', [UserController::class, 'updateLastName']);
-    Route::put('/updatePhone', [UserController::class, 'updatePhone']);
-    Route::put('/updateImage', [UserController::class, 'updateImage']);
-    Route::put('/updatePassword', [UserController::class, 'updatePassword']);
+    Route::post('password/request', [PasswordResetController::class, 'sendConfirmationEmail']);  // Send email
+Route::get('password/confirm/{token}', [PasswordResetController::class, 'confirmReset']); // Confirm password reset
+Route::post('password/reset/{token}', [PasswordResetController::class, 'resetPassword']);
+Route::put('update',[UserController::class,'updateInfo']);
+Route::post('checkpassword',[UserController::class,'checkPassword']);
+Route::put('/updatePassword', [UserController::class, 'updatePassword']);
 });
