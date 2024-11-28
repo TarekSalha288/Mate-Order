@@ -56,33 +56,25 @@ class UserController extends Controller
         return response()->json(['message' => 'Info Updated Succseflly'], 200);
 
     }
-    public function checkPassword(Request $request){
-        $validator=Validator::make($request->all(),[
-            'password'=>'required',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-        if(Hash::check($request->password,Auth::user()->password)){
-            return response()->json(true);
-        }
-        return response()->json(false);
-    }
+
     public function updatePassword(Request $request)
     {
         $validator=Validator::make($request->all(),[
+            'current_password'=>'required',
 'password'=>'required|min:8',
 'confirmation_password'=>'required|min:8',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
+        if(Hash::check($request->current_password,Auth::user()->password)){
     if($request->password==$request->confirmation_password){
         User::where('id',auth()->user()->id)->update([
             'password'=>$request->password,
         ]);
         return response()->json(true);
     }
+}
     return response()->json(false);
     }
 
