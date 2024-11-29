@@ -77,6 +77,14 @@ class UserController extends Controller
 }
     return response()->json(false);
     }
+public function deleteImage(){
+    $user=auth()->user();
+    if (request()->hasFile('image')){
+        $destenation='public/imgs/'.$user->image_path;
+        if (file_exists($destenation)){
+       File::delete($destenation);
+       }
+}
 
     // in update first and last name and image I put varefied because when I update my profile I may delete my name and click update potom
 
