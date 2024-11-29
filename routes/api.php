@@ -29,6 +29,6 @@ Route::group([
 Route::get('password/confirm/{token}', [PasswordResetController::class, 'confirmReset']); // Confirm password reset
 Route::post('password/reset/{token}', [PasswordResetController::class, 'resetPassword']);
 Route::put('update',[UserController::class,'updateInfo']);
-
+Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
 Route::put('/updatePassword', [UserController::class, 'updatePassword']);
 });
