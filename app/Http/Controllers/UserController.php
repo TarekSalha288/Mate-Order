@@ -76,7 +76,7 @@ public function updateImage(){
     $user=User::find(auth()->user()->id)->first();
     if (request()->hasFile('image')){
 
-        $destenation='public/imgs/'.$user->image_path;
+        $destenation='public/imgs/'.$user->id.'/'.$user->image_path;
         if (file_exists($destenation)){
        File::delete($destenation);
        }
