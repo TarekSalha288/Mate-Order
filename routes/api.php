@@ -31,4 +31,5 @@ Route::post('password/reset/{token}', [PasswordResetController::class, 'resetPas
 Route::put('update',[UserController::class,'updateInfo']);
 Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
 Route::put('/updatePassword', [UserController::class, 'updatePassword']);
+Route::put('/udpdateImage',[UserController::class,'updateImage']);
 });

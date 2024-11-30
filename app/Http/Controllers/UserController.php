@@ -40,19 +40,6 @@ class UserController extends Controller
             'phone' => $request->phone,
 
         ]);
-        if (request()->hasFile('image')){
-            $destenation='public/imgs/'.$user->image_path;
-            if (file_exists($destenation)){
-           File::delete($destenation);
-           }
-           $user=User::find(Auth::id());
-           $path=$this->uploadImage(request(),'users',$user->id);
-           $user->image_path = $path;
-         }
-
-
-
-     $user->save();
         return response()->json(['message' => 'Info Updated Succseflly'], 200);
 
     }
@@ -84,8 +71,22 @@ public function deleteImage(){
         if (file_exists($destenation)){
        File::delete($destenation);
        }
+}}
+public function updateImage(){
+    $user=User::find(auth()->user()->id)->first();
+    if (request()->hasFile('image')){
+
+        $destenation='public/imgs/'.$user->image_path;
+        if (file_exists($destenation)){
+       File::delete($destenation);
+       }
+
+       $path=$this->uploadImage(request(),'users',$user->id);
+       $user->image_path = $path;
+     }
+ $user->save();
+ return response()->json('Image Updated Succssful');
 }
 
-    // in update first and last name and image I put varefied because when I update my profile I may delete my name and click update potom
 
 }
