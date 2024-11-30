@@ -67,7 +67,7 @@ class UserController extends Controller
 public function deleteImage(){
     $user=auth()->user();
     if (request()->hasFile('image')){
-        $destenation='public/imgs/'.$user->image_path;
+        $destenation='public/imgs/'.$user->id.'/'.$user->image_path;
         if (file_exists($destenation)){
        File::delete($destenation);
        }
