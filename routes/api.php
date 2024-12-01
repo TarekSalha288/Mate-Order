@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Middleware\AdminMiddleWare;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -21,15 +23,20 @@ Route::group([
 });
 Route::post('verify',[AuthController::class,'verify']);
 
-
 Route::group([
-    'middleware' => [TowFactor::class,'api'],
+    'middleware' => [TowFactor::class,'api','auth'],
 ], function ($router) {
     Route::post('password/request', [PasswordResetController::class, 'sendConfirmationEmail']);  // Send email
 Route::get('password/confirm/{token}', [PasswordResetController::class, 'confirmReset']); // Confirm password reset
 Route::post('password/reset/{token}', [PasswordResetController::class, 'resetPassword']);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Route::put('update',[UserController::class,'updateInfo']);
 Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
 Route::put('/updatePassword', [UserController::class, 'updatePassword']);
-Route::put('/udpdateImage',[UserController::class,'updateImage']);
+Route::put('/updateImage',[UserController::class,'updateImage']);
+Route::post('/addAddress',[UserController::class,'addAddress']);
+Route::get('/resendCode',[AuthController::class,'resendCode']);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Route::post('createStore',[AdminController::class,'createStore'])->middleware(AdminMiddleWare::class);
+Route::delete('deleteAccount',[AdminController::class,'deleteAccount'])->middleware(AdminMiddleWare::class);
 });

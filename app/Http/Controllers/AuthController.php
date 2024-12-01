@@ -21,11 +21,15 @@ class AuthController extends Controller
 
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
+     // Check for existing unverified user with expired verification code
+     $existingUser = User::where('email', request()->email)->first();
+     if ($existingUser && $existingUser->expire_at && $existingUser->expire_at < now()){
+$existingUser->delete();
+    }
+    if ($validator->fails()) {
 
-
+        return response()->json($validator->errors()->toJson(), 400);
+    }
         $user = new User;
         $user->firstName = request()->firstName;
         $user->lastName = request()->lastName;
@@ -39,15 +43,14 @@ class AuthController extends Controller
         $user->generateCode();
         Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
         return response()->json(['user'=>$user,'token'=>$token], 201);
+
     }
     public function login()
     {
         $credentials = request(['phone', 'password']);
-
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         return $this->respondWithToken($token);
     }
 
@@ -89,18 +92,30 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 43200 // refresh in one month
+            'expires_in' => auth()->factory()->getTTL() * 43200
         ]);
     }
     public function verify(){
+        if(auth()->check()){
         $user=auth()->user();
        if(request()->input('code')== $user->code){
          $user->code=null;
          $user->expire_at=null;
          $user->save();
         return response()->json(true);
-       }
+       }}
        return response()->json(false);
+    }
+    public function resendCode(){
+
+    $user=auth()->user();
+    if($user->expire_at< now()){
+        User::find($user->id)->delete();
+        return false;
+    }
+Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
+return true;
+
     }
 
    }

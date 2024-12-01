@@ -60,7 +60,7 @@ class User extends Authenticatable implements JWTSubject
     public function generateCode(){
         $this->timestamps=false;
         $this->code=rand(100000,999999);
-        $this->expire_at=now()->addMinutes(15);
+        $this->expire_at=now()->addMinutes(5);
         $this->save();
     }
 

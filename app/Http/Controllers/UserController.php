@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TowFactorMail;
+use App\Models\Address;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -86,6 +87,22 @@ public function updateImage(){
      }
  $user->save();
  return response()->json('Image Updated Succssful');
+}
+public function addAddress(){
+    $validator = Validator::make(request()->all(), [
+        'tall'=>'required',
+        'width' => 'required',
+    ]);
+    if ($validator->fails()) {
+        return response()->json($validator->errors()->toJson(), 400);
+    }
+Address::create([
+    'tall'=>request()->input('tall'),
+    'width'=>request()->input('width'),
+    'note'=>request()->input('note'),
+    'user_id'=>auth()->user()->id,
+]);
+return response()->json(['message'=>'Added Address Sucssfully'],201);
 }
 
 

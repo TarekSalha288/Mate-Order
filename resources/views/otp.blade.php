@@ -36,7 +36,7 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="{{ asset('imgs/photo_2024-11-27_19-05-52.jpg') }}" alt="Mate Order Logo"
+            <img src="{{ asset('public/imgs/photo_2024-11-27_19-05-52.jpg') }}" alt="Mate Order Logo"
             width="150">
         </div>
         <h1>Verify Your Account</h1>
