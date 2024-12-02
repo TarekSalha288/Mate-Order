@@ -18,7 +18,7 @@ class TowFactor
         $user=auth()->user();
         if(auth()->check() &&  $user->code){
             if(!$request->is('verify')){
-             return response()->json('You Should Verify Your Account Before That');
+             return response()->json(['message'=>'You Should Verify Your Account Before That'],400);
             }
         }
         return $next($request);

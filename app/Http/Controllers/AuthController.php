@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Mail\TowFactorMail;
 use App\Models\User;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,19 +16,17 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'firstName' => 'required',
             'lastName' => 'required',
-            'phone' => 'required|size:12|starts_with:+,963|unique:users',
+            'phone' => 'required|size:13|starts_with:+,963|unique:users',
             'email'=>'required|email|unique:users',
             'password' => 'required|confirmed|min:8',
 
         ]);
-
      // Check for existing unverified user with expired verification code
      $existingUser = User::where('email', request()->email)->first();
      if ($existingUser && $existingUser->expire_at && $existingUser->expire_at < now()){
 $existingUser->delete();
     }
     if ($validator->fails()) {
-
         return response()->json($validator->errors()->toJson(), 400);
     }
         $user = new User;
@@ -38,9 +37,9 @@ $existingUser->delete();
         $user->email=request()->email;
         $user->save();
 
-        $credentials = request(['phone', 'password']);
-        $token = auth()->attempt($credentials);
         $user->generateCode();
+        $credentials = request(['phone', 'password']);
+         $token = auth()->attempt($credentials);
         Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
         return response()->json(['user'=>$user,'token'=>$token], 201);
 
@@ -96,15 +95,23 @@ $existingUser->delete();
         ]);
     }
     public function verify(){
+        $validator = Validator::make(request()->all(), [
+            'code' => 'required',
+        ]);
+         if ($validator->fails()) {
+             return response()->json($validator->errors()->toJson(), 400);
+ }
         if(auth()->check()){
         $user=auth()->user();
        if(request()->input('code')== $user->code){
          $user->code=null;
          $user->expire_at=null;
          $user->save();
-        return response()->json(true);
-       }}
-       return response()->json(false);
+
+        return response()->json(['message'=>'Code Is Correct'],200);
+       }
+    }
+       return response()->json(['message'=>'Code Is Not Correct '],400);
     }
     public function resendCode(){
 
