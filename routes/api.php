@@ -47,7 +47,7 @@ Route::group([
     Route::get('allStores', [AdminController::class, 'stores'])->middleware(AdminMiddleWare::class);
 });
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Route::middleware([SuperUserMiddleware::class, 'api', 'auth'])->group(function () {
+Route::middleware([SuperUserMiddleware::class, 'api', 'auth',TowFactor::class])->group(function () {
     Route::post('createProduct', [SuperUserController::class, 'createProduct']);
     Route::get('getAllProductInStore', [SuperUserController::class, 'getAllProductInStore']);
     Route::put('updateProductInStore/{id}', [SuperUserController::class, 'updateProductInStore']);
