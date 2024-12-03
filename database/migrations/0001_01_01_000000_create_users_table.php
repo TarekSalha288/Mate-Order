@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('firstName');
             $table->string('lastName');
-            $table->char('phone',13)->unique();
+            $table->string('phone',13)->unique();
             $table->string('email')->unique();
             $table->string('image_path')->default('null');
             $table->string('password');

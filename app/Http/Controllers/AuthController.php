@@ -122,7 +122,6 @@ $existingUser->delete();
     }
 Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
 return true;
-
     }
 
    }

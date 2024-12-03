@@ -39,4 +39,8 @@ Route::get('/resendCode',[AuthController::class,'resendCode']);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Route::post('createStore',[AdminController::class,'createStore'])->middleware(AdminMiddleWare::class);
 Route::delete('deleteAccount',[AdminController::class,'deleteAccount'])->middleware(AdminMiddleWare::class);
+Route::put('updateStore/{id}',[AdminController::class,'updateStore'])->middleware(AdminMiddleWare::class);
+Route::get('editStore/{id}',[AdminController::class,'edit'])->middleware(AdminMiddleWare::class);
+Route::delete('deleteStore/{id}',[AdminController::class,'deleteStore'])->middleware(AdminMiddleWare::class);
+Route::get('allStores',[AdminController::class,'stores'])->middleware(AdminMiddleWare::class);
 });

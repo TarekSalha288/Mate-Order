@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-
+use Illuminate\Database\Eloquent\Relations\HasOne;
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
@@ -62,6 +62,10 @@ class User extends Authenticatable implements JWTSubject
         $this->code=rand(100000,999999);
         $this->expire_at=now()->addMinutes(5);
         $this->save();
+    }
+    public function store(): HasOne
+    {
+        return $this->hasOne(Store::class);
     }
 
 }
