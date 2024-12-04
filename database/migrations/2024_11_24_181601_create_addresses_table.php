@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('tall');
             $table->string('width');
-            $table->string('note')->default()->nullable();
+            $table->string('note')->default('null');
             $table->foreignId('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->timestamps();
         });

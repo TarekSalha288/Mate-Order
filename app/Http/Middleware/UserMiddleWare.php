@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class SuperUserMiddleware
+class UserMiddleWare
 {
     /**
      * Handle an incoming request.
@@ -15,10 +15,14 @@ class SuperUserMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->status_role == ("superUser")) {
-            return $next($request);
-        }
+        if(auth()->check()){
+            if(auth()->user()->status_role=='user'){
+                return $next($request);
+            }
 
-        return response()->json(['data' => null, 'message' => 'you don,t have Entry permission'],400);
+            return response()->json(['message'=>'You Can\'t Access This Pages '],400);
+        }
+        return response()->json(['message'=>'You Should LogIn '],400);
+
     }
 }

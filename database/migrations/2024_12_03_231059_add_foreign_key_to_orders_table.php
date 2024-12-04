@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('addresse_id')->references('id')->on('addresses')->cascadeOnDelete();
+            $table->foreignId('address_id')->references('id')->on('addresses')->cascadeOnDelete();
         });
     }
 

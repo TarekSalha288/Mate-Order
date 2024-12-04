@@ -11,9 +11,6 @@ class SuperUserController extends Controller
 {
     public function createProduct(Request $request)
     {
-        $user_id = auth()->user()->id;
-        $storeOwner = Store::where('user_id', $user_id)->first();
-        $store_id = $storeOwner->id;
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'amount' => 'required',
@@ -24,16 +21,20 @@ class SuperUserController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
+        $user_id = auth()->user()->id;
+        $storeOwner = Store::where('user_id', $user_id)->first();
+        $store_id = $storeOwner->id;
         Product::create([
             'store_id' => $store_id,
             'name' => $request->name,
             'amount' => $request->amount,
             'price' => $request->price,
             'category' => $request->category,
-            'image_path' => $request->image_path
+            'image_path' => $request->image_path,
         ]);
-        return response()->json(['message' => 'product added successfully'], 200);
-    }
+        return response()->json(['message' => 'product added successfully'], 200);}
+
+
     public function getAllProductInStore(Request $request)
     {
         $user_id = auth()->user()->id;
