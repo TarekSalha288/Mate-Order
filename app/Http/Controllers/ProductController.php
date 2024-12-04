@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,5 +27,48 @@ if($fav){
 }
 return response()->json(['message'=>'You Can\'t Delete This '],400);
     }
+    public function showProducts($category)
+    {
+        $products = Product::where('category', $category)->simplePaginate(10);
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No Products For This Category'], 400);
+        }
+        return response()->json([
+            'data' => $products,
+        ], 200);
+    }
+
+    public function allProducts()
+    {
+        $products = Product::paginate(10);
+        $allProducts = [];
+
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No Products Available'], 400);
+        }
+
+        foreach ($products as $product) {
+            $fav = DB::table('favorite')
+                ->where('user_id', auth()->user()->id)
+                ->where('product_id', $product->id)
+                ->exists();
+
+            $owner = Store::where('id', $product->store_id)->first();
+$product->toArray();
+$product['owner']=$owner->store_name;
+$product['fav']=$fav;
+            $allProducts[] = [
+                'product' => $product,
+            ];
+        }
+     return response()->json([ 'data' => $allProducts,
+     'pagination' => [ 'current_page' => $products->currentPage(),
+     'last_page' => $products->lastPage(),
+     'total' => $products->total(),
+     'per_page' => $products->perPage(),
+     'next_page_url' => $products->nextPageUrl(),
+     'prev_page_url' => $products->previousPageUrl(), ], ], 200);
+    }
+
 
 }

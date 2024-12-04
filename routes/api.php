@@ -57,6 +57,8 @@ Route::group([
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
     Route::post('addFav/{id}',[ProductController::class,'addFavorite']);
     Route::post('disFav/{id}',[ProductController::class,'disFavorite']);
+    Route::get('showProducts/{category}',[ProductController::class,'showProducts']);
+    Route::get('allProducts',[ProductController::class,'allProducts']);
     Route::get('showStores',[StoreController::class,'show']);
     Route::get('storeProducts/{id}',[StoreController::class,'edit']);
 });
