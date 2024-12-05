@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Store;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Validator;
 class StoreController extends Controller
 {
 public function show(){
@@ -24,4 +24,18 @@ public function edit($id){
 return response()->json(['message'=>'Store Not Found'],400);
 }
 
+public function searchStore(){
+    $validator=Validator::make(request()->all(),[
+        'name'=>'required',
+    ]);
+    if ($validator->fails()) {
+        return response()->json($validator->errors()->toJson(), 400);
+    }
+    $query = request()->input('name');
+    $stores = Store::where('store_name', 'LIKE', "%{$query}%")->get();
+    //$stores->toArray();
+    if($stores->isEmpty())
+    return response()->json(['message'=>'No Result'],400);
+    return response()->json($stores,200);
+}
 }

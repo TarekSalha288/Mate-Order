@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Product;
 use App\Models\User;
 use App\UploadImageTrait;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TowFactorMail;
 use App\Models\Address;
+use App\Models\Store;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -103,6 +105,12 @@ Address::create([
     'user_id'=>auth()->user()->id,
 ]);
 return response()->json(['message'=>'Added Address Sucssfully'],201);
+}
+public function showAddresses(){
+    $addresses=User::find(auth()->user()->id)->addreses;
+    if($addresses->isEmpty())
+    return response()->json(['message'=>'You Don\'t Have Addresses Yet'],400);
+return response()->json($addresses,200);
 }
 
 

@@ -110,8 +110,10 @@ $existingUser->delete();
 
         return response()->json(['message'=>'Code Is Correct'],200);
        }
-    }
+
        return response()->json(['message'=>'Code Is Not Correct '],400);
+    }
+    return response()->json(['message'=>'You Should Signup Before '],400);
     }
     public function resendCode(){
 

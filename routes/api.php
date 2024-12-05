@@ -56,11 +56,16 @@ Route::group([
     Route::put('/updateImage', [UserController::class, 'updateImage']);
     Route::post('/addAddress', [UserController::class, 'addAddress']);
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
+    Route::get('showAddresses',[UserController::class,'showAddresses']);
+    /////////////////////////////////////////////////////////////////////////////////
     Route::post('addFav/{id}', [ProductController::class, 'addFavorite']);
     Route::post('disFav/{id}', [ProductController::class, 'disFavorite']);
     Route::get('showProducts/{category}', [ProductController::class, 'showProducts']);
     Route::get('allProducts', [ProductController::class, 'allProducts']);
+    Route::get('searchProduct', [ProductController::class, 'searchProduct']);
+    //////////////////////////////////////////////////////////////////////////////
     Route::get('showStores', [StoreController::class, 'show']);
+    Route::get('searchStore', [StoreController::class, 'searchStore']);
     Route::get('storeProducts/{id}', [StoreController::class, 'edit']);
     ////////////////////////////////////////////////////////////////////////////////////
     Route::post('addOrder/{Product_id}/{adress_id}', [OrderController::class, 'addOrder']);

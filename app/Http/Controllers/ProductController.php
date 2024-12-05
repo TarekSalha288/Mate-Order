@@ -6,7 +6,7 @@ use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Validator;
 class ProductController extends Controller
 {
     public function addFavorite($id){
@@ -86,6 +86,19 @@ $product['fav']=$fav;
      'per_page' => $products->perPage(),
      'next_page_url' => $products->nextPageUrl(),
      'prev_page_url' => $products->previousPageUrl(), ], ], 200);
+    }
+    public function searchProduct(){
+        $validator=Validator::make(request()->all(),[
+            'name'=>'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        $query = request()->input('name');
+        $products = Product::where('name', 'LIKE', "%{$query}%")->get();
+        if($products->isEmpty())
+        return response()->json(['message'=>'No Result'],400);
+        return response()->json($products,200);
     }
 
 
