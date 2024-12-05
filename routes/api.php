@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SuperUserController;
 use App\Http\Middleware\AdminMiddleWare;
 use App\Http\Middleware\SuperUserMiddleware;
@@ -42,7 +43,7 @@ Route::group([
 
 });
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Route::group(['middleware'=>[SuperUserMiddleware::class, 'api', 'auth',TowFactor::class]],function () {
+Route::group(['middleware' => [SuperUserMiddleware::class, 'api', 'auth', TowFactor::class]], function () {
     Route::post('createProduct', [SuperUserController::class, 'createProduct']);
     Route::get('getAllProductInStore', [SuperUserController::class, 'getAllProductInStore']);
     Route::put('updateProductInStore/{id}', [SuperUserController::class, 'updateProductInStore']);
@@ -50,20 +51,25 @@ Route::group(['middleware'=>[SuperUserMiddleware::class, 'api', 'auth',TowFactor
 });
 
 Route::group([
-    'middleware' => [TowFactor::class, UserMiddleWare::class,'api', 'auth'],
+    'middleware' => [TowFactor::class, UserMiddleWare::class, 'api', 'auth'],
 ], function ($router) {
     Route::put('/updateImage', [UserController::class, 'updateImage']);
     Route::post('/addAddress', [UserController::class, 'addAddress']);
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
-    Route::post('addFav/{id}',[ProductController::class,'addFavorite']);
-    Route::post('disFav/{id}',[ProductController::class,'disFavorite']);
-    Route::get('showProducts/{category}',[ProductController::class,'showProducts']);
-    Route::get('allProducts',[ProductController::class,'allProducts']);
-    Route::get('showStores',[StoreController::class,'show']);
-    Route::get('storeProducts/{id}',[StoreController::class,'edit']);
+    Route::post('addFav/{id}', [ProductController::class, 'addFavorite']);
+    Route::post('disFav/{id}', [ProductController::class, 'disFavorite']);
+    Route::get('showProducts/{category}', [ProductController::class, 'showProducts']);
+    Route::get('allProducts', [ProductController::class, 'allProducts']);
+    Route::get('showStores', [StoreController::class, 'show']);
+    Route::get('storeProducts/{id}', [StoreController::class, 'edit']);
+    ////////////////////////////////////////////////////////////////////////////////////
+    Route::post('addOrder/{Product_id}/{adress_id}', [OrderController::class, 'addOrder']);
+    Route::get('getAllOrderInCart', [OrderController::class, 'getAllOrdersInCart']);
+    Route::put('updateOrder/{order_id}/{adress_id}', [OrderController::class, 'updateOrder']);
+    Route::delete('deleteOrder/{order_id}', [OrderController::class, 'deleteOrder']);
 });
 Route::group([
-    'middleware' => [TowFactor::class,AdminMiddleWare::class, 'api', 'auth'],
+    'middleware' => [TowFactor::class, AdminMiddleWare::class, 'api', 'auth'],
 ], function ($router) {
     Route::post('createStore', [AdminController::class, 'createStore']);
     Route::delete('deleteAccount', [AdminController::class, 'deleteAccount']);
