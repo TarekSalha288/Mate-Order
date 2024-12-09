@@ -28,6 +28,7 @@ Route::group([
     Route::post('/me', [AuthController::class, 'me'])->middleware(['auth:api', TowFactor::class])->name('me');
 });
 Route::post('verify', [AuthController::class, 'verify']);
+Route::get('/resendCode', [AuthController::class, 'resendCode']);
 //every one can visit this routes
 Route::group([
     'middleware' => [TowFactor::class, 'api', 'auth'],
@@ -38,7 +39,6 @@ Route::group([
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Route::put('update', [UserController::class, 'updateInfo']);
     Route::put('/updatePassword', [UserController::class, 'updatePassword']);
-    Route::get('/resendCode', [AuthController::class, 'resendCode']);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 });
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
