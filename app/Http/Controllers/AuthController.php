@@ -19,7 +19,6 @@ class AuthController extends Controller
             'phone' => 'required|size:13|starts_with:+,963|unique:users',
             'email'=>'required|email|unique:users',
             'password' => 'required|confirmed|min:8',
-
         ]);
      // Check for existing unverified user with expired verification code
      $existingUser = User::where('email', request()->email)->first();
@@ -36,7 +35,6 @@ $existingUser->delete();
         $user->password = bcrypt(request()->password);
         $user->email=request()->email;
         $user->save();
-
         $user->generateCode();
         $credentials = request(['phone', 'password']);
          $token = auth()->attempt($credentials);
@@ -99,10 +97,8 @@ $existingUser->delete();
          $user->code=null;
          $user->expire_at=null;
          $user->save();
-
         return response()->json(['message'=>'Code Is Correct'],200);
        }
-
        return response()->json(['message'=>'Code Is Not Correct '],400);
     }
     return response()->json(['message'=>'You Should Signup Before '],400);
@@ -111,14 +107,14 @@ $existingUser->delete();
     $user=auth()->user();
     if(!auth()->check())
     return response()->json(['message'=>'Unauthorized'],401);
-    if($user->expire_at< now()){
-        User::find($user->id)->delete();
-        return response()->json(['message'=>'Your Code Is Changed'],400);
-    }
+if($user->expire_at < now()){
+    User::destroy($user->id);
+return response()->json(['message'=>'You Should SignUp Again'],401);
+}
+$user->generateCode();
 Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
 return response()->json(['message'=>'Code Is Sending']);
     }
-
    }
 
 
