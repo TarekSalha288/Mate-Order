@@ -74,18 +74,10 @@ $existingUser->delete();
 
         return response()->json(['message' => 'Successfully logged out']);
     }
-
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function refresh()
     {
         return $this->respondWithToken(auth()->refresh());
     }
-
-
     protected function respondWithToken($token)
     {
         return response()->json([
@@ -116,14 +108,15 @@ $existingUser->delete();
     return response()->json(['message'=>'You Should Signup Before '],400);
     }
     public function resendCode(){
-
     $user=auth()->user();
+    if(!auth()->check())
+    return response()->json(['message'=>'Unauthorized'],401);
     if($user->expire_at< now()){
         User::find($user->id)->delete();
-        return false;
+        return response()->json(['message'=>'Your Code Is Changed'],400);
     }
 Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
-return true;
+return response()->json(['message'=>'Code Is Sending']);
     }
 
    }
