@@ -146,10 +146,17 @@ public function receivingOrders(){
 return response()->json($orders,200);
 }
 public function archive(){
-    $products=Store::where('user_id',auth()->user()->id)->products();
+    $products=Store::where('user_id',auth()->user()->id)->products()->paginate(10);
     if($products->isEmpty())
     return response()->json(['message'=>'No Items To Show']);
-return response()->json($products,200);
+    return response()->json([ 'data' => $products,
+    'pagination' => [ 'current_page' => $products->currentPage(),
+    'last_page' => $products->lastPage(),
+    'total' => $products->total(),
+    'per_page' => $products->perPage(),
+    'next_page_url' => $products->nextPageUrl(),
+    'prev_page_url' => $products->previousPageUrl(), ], ], 200);
+
 }
 public function notifications(){
     $notifications=User::find(auth()->user()->id)->notifications;
