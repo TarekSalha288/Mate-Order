@@ -12,6 +12,9 @@ class Order extends Model
     return $this->hasOne(Store::class);
     }
     public function user():HasOne{
-        return $this->hasOne(user::class);
+        return $this->hasOne(User::class);
         }
+        public function product():HasOne{
+            return $this->hasOne(Product::class);
+            }
 }

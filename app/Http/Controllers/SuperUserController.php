@@ -122,6 +122,10 @@ class SuperUserController extends Controller
         $user=$order->user;
         if($owner!=auth()->user())
         return response()->json(['message'=>'You Can\'t Do That ']);
+    $product=$order->product;
+    $amount=$product->amount;
+    $amount+=$order->total_amount;
+    $product->update(['amount'=>$amount]);
         $order->delete();
         $user->notify(new RejectSending($id,$store->store_name));
         return response()->json(['message'=>'Reject  Sending Order Of Id'.$id]);
