@@ -93,6 +93,10 @@ $existingUser->delete();
  }
         if(auth()->check()){
         $user=auth()->user();
+        if($user->expire_at < now()){
+            User::destroy($user->id);
+        return response()->json(['message'=>'You Should SignUp Again'],401);
+        }
        if(request()->input('code')== $user->code){
          $user->code=null;
          $user->expire_at=null;
@@ -107,11 +111,12 @@ $existingUser->delete();
     $user=auth()->user();
     if(!auth()->check())
     return response()->json(['message'=>'Unauthorized'],401);
-if($user->expire_at < now()){
-    User::destroy($user->id);
-return response()->json(['message'=>'You Should SignUp Again'],401);
-}
-$user->generateCode();
+    if($user->expire_at < now()){
+        User::destroy($user->id);
+    return response()->json(['message'=>'You Should SignUp Again'],401);
+    }
+$user->code=rand(100000,999999);
+$user->save();
 Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
 return response()->json(['message'=>'Code Is Sending']);
     }
