@@ -28,7 +28,7 @@ if($fav){
 return response()->json(['message'=>'You Can\'t Delete This '],400);
     }
     public function showProducts($category)
-    {$products = Product::where('category',$category)->paginate(10);
+    {$products = Product::where('category',$category)->where('active',1)->paginate(10);
         $allProducts = [];
         if ($products->isEmpty()) {
             return response()->json(['message' => 'No Products Available'], 400);
@@ -58,7 +58,7 @@ $product['fav']=$fav;
 
     public function allProducts()
     {
-        $products = Product::paginate(10);
+        $products = Product::where('active',1)->paginate(10);
         $allProducts = [];
 
         if ($products->isEmpty()) {
@@ -95,7 +95,7 @@ $product['fav']=$fav;
             return response()->json($validator->errors()->toJson(), 400);
         }
         $query = request()->input('name');
-        $products = Product::where('name', 'LIKE', "%{$query}%")->get();
+        $products = Product::where('name', 'LIKE', "%{$query}%")->where('active',1)->get();
         if($products->isEmpty())
         return response()->json(['message'=>'No Result'],400);
         return response()->json($products,200);

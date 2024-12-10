@@ -44,7 +44,7 @@ class SuperUserController extends Controller
         $user_id = auth()->user()->id;
         $storeOwner = Store::where('user_id', $user_id)->first();
         $store_id = $storeOwner->id;
-        $products = Product::where('store_id', $store_id)->paginate(10);
+        $products = Product::where('store_id', $store_id)->where('active',1)->paginate(10);
         if (!$products) {
             return response()->json(['data' => null, 'message' => 'get products failed'], 400);
         }
@@ -58,7 +58,7 @@ class SuperUserController extends Controller
             return response()->json(['message' => 'Store not found'], 404);
         }
         $store_id = $storeOwner->id;
-        $products = Product::where('store_id', $store_id)->get();
+        $products = Product::where('store_id', $store_id)->where('active',1)->get();
         if (!$products) {
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
@@ -93,7 +93,7 @@ class SuperUserController extends Controller
             return response()->json(['message' => 'Store not found'], 404);
         }
         $store_id = $storeOwner->id;
-        $products = Product::where('store_id', $store_id)->get();
+        $products = Product::where('store_id', $store_id)->where('active',1)->get();
         if (!$products) {
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
@@ -146,7 +146,7 @@ public function receivingOrders(){
 return response()->json($orders,200);
 }
 public function archive(){
-    $products=Store::where('user_id',auth()->user()->id)->products()->paginate(10);
+    $products=Store::where('user_id',auth()->user()->id)->products()->where('active',0)->paginate(10);
     if($products->isEmpty())
     return response()->json(['message'=>'No Items To Show']);
     return response()->json([ 'data' => $products,
@@ -156,7 +156,6 @@ public function archive(){
     'per_page' => $products->perPage(),
     'next_page_url' => $products->nextPageUrl(),
     'prev_page_url' => $products->previousPageUrl(), ], ], 200);
-
 }
 public function notifications(){
     $notifications=User::find(auth()->user()->id)->notifications;
