@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('amount');
             $table->double('price');
             $table->string('category');
+            $table->integer('active')->default(1);
             $table->string('image_path')->default('null');
             $table->timestamps();
         });

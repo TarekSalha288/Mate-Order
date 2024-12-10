@@ -47,8 +47,14 @@ Route::group(['middleware' => [SuperUserMiddleware::class, 'api', 'auth', TowFac
     Route::get('getAllProductInStore', [SuperUserController::class, 'getAllProductInStore']);
     Route::put('updateProductInStore/{id}', [SuperUserController::class, 'updateProductInStore']);
     Route::delete('deleteProductInStore/{id}', [SuperUserController::class, 'deleteProductInStore']);
+    Route::post('acceptSending/{id}',[SuperUserController::class,'acceptSending']);
+    Route::delete('rejectSending/{id}',[SuperUserController::class,'rejectSending']);
+    Route::get('waiting',[SuperUserController::class,'waitingOrders']);
+    Route::get('sending',[SuperUserController::class,'sendingOrders']);
+    Route::get('receiving',[SuperUserController::class,'receivingOrders']);
+    Route::get('archive',[SuperUserController::class,'archive']);
+    Route::get('notifications',[SuperUserController::class,'notifications']);
 });
-
 Route::group([
     'middleware' => [TowFactor::class, UserMiddleWare::class, 'api', 'auth'],
 ], function ($router) {

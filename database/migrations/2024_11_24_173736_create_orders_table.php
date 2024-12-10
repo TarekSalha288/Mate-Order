@@ -15,13 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('product_id')->references('id')->on('products')->cascadeOnDelete();
-
             $table->integer('total_price');
             $table->integer('total_amount');
-            $table->integer('send')->default(0);
-            $table->integer('recive')->default(0);
-            $table->date('send_date')->default(now());
-            $table->date('recive_date')->default(now());
+             $table->string('status')->default('waiting');
+            $table->dateTime('send_date')->nullable();
+            $table->dateTime('recive_date')->nullable();
             $table->timestamps();
         });
     }
