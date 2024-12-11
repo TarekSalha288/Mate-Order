@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
+use App\Notifications\OrderSendingToSuperUser;
 use DB;
 use Illuminate\Http\Request;
+use Notification;
 use PHPUnit\Framework\Constraint\IsEmpty;
 use Validator;
 
@@ -13,8 +17,9 @@ class OrderController extends Controller
     public function addOrder(Request $request, $product_id, $adress_id)
     {
         // in flutter its important to put the add adress puttom to add adress id if they dont have adress id to pass it in param
-        $user_id = auth()->user()->id;
+        $user = auth()->user();
         $product = Product::find($product_id);
+        $super_user = User::where('id', $product->store()->user_id)->get();
         $validator = Validator::make($request->all(), [
             'total_amount' => 'required',
         ]);
@@ -25,16 +30,18 @@ class OrderController extends Controller
         if ($request->total_amount > $product->amount) {
             return response()->json(['message' => "we dont have enouth amount the total amount we have just $product->amount"]);
         }
-        DB::table('orders')->insert([
+        $order = Order::create([
             'total_amount' => $request->total_amount,
             'total_price' => $total_price,
-            'user_id' => $user_id,
+            'user_id' => $user->id,
             'product_id' => $product_id,
-            'address_id' => $adress_id
+            'address_id' => $adress_id,
+            'store_id' => $product->store_id
         ]);
         $product->update([
             'amount' => $product->amount - $request->total_amount
         ]);
+        Notification::send($super_user, new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
         return response()->json(['message' => 'order added successfully']);
         // if we order all amount we must delete this product after accept the order in superUser
         // and if its disaccept we must return the amount to product
@@ -42,7 +49,7 @@ class OrderController extends Controller
     public function getAllOrdersInCart()
     {
         $user_id = auth()->user()->id;
-        $orders = DB::table('orders')->where('send', 0)
+        $orders = Order::where('status', 'waiting')
             ->where('user_id', $user_id)
             ->get();
         // I must use scope later and tarek in this case we can use just where
@@ -53,7 +60,7 @@ class OrderController extends Controller
     }
     public function updateOrder(Request $request, $order_id, $adress_id)
     {
-        $order = DB::table('orders')->find($order_id);
+        $order = Order::find($order_id);
         if (!$order) {
             return response()->json(['message' => 'order accepted you can,t updated the order']);
         }// if the the order accepted and stell in the cart
@@ -74,7 +81,7 @@ class OrderController extends Controller
                 return response()->json(['message' => "we dont have enouth amount the total amount we have just $product->amount"]);
             } else {
 
-                DB::table('orders')->where('id', $order_id)->update([
+                $order->update([
                     'total_amount' => $new_amount,
                     'total_price' => $total_price,
                     'address_id' => $adress_id
@@ -85,7 +92,7 @@ class OrderController extends Controller
             }
         } elseif ($new_amount < $old_amount) {
             $new_total_amount = $old_amount - $new_amount;
-            DB::table('orders')->where('id', $order_id)->update([
+            $order->update([
                 'total_amount' => $new_amount,
                 'total_price' => $total_price,
                 'address_id' => $adress_id
@@ -94,7 +101,7 @@ class OrderController extends Controller
                 'amount' => $product->amount + $new_total_amount
             ]);
         } else {
-            DB::table('orders')->where('id', $order_id)->update([
+            $order->update([
                 'total_amount' => $new_amount,
                 'total_price' => $total_price,
                 'address_id' => $adress_id
@@ -104,7 +111,7 @@ class OrderController extends Controller
     }
     public function deleteOrder($order_id)
     {
-        $order = DB::table('orders')->find($order_id);
+        $order = Order::find($order_id);
         $amount = $order->total_amount;
         $product = Product::find($order->product_id);
         $deleteProduct = DB::table('orders')->where('id', $order_id)->delete();

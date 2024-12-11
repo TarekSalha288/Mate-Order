@@ -10,14 +10,17 @@ class Store extends Model
 {
     //
 
-    protected $guarded=[];
-    public function user(): HasOne{
+    protected $guarded = [];
+    public function user(): HasOne
+    {
         return $this->hasOne(User::class);
     }
-    public function products(): HasMany{
+    public function products(): HasMany
+    {
         return $this->hasMany(Product::class);
     }
-    public function orders(): HasMany{
+    public function orders(): HasMany
+    {
         return $this->hasMany(Order::class);
     }
 }

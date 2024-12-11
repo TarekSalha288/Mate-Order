@@ -7,19 +7,21 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AcceptSending extends Notification
+class OrderSendingToSuperUser extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
+    private $product_id;
     private $order_id;
-    private $store_name;
-    public function __construct($order_id, $store_name)
+    private $user_name;
+    public function __construct($user_name, $product_id, $order_id)
     {
+        $user_name = $this->user_name;
+        $product_id = $this->product_id;
         $order_id = $this->order_id;
-        $store_name = $this->store_name;
     }
 
     /**
@@ -45,7 +47,7 @@ class AcceptSending extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => "we accept sending your order of Id: $this->order_id from store:$this->store_name"
+            'message' => "you have new order from user: $this->user_name and his order id: $this->order_id from product id: $this->product_id",
         ];
     }
 }

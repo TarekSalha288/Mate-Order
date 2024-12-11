@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
-    protected $guarded=[];
-    public function store():HasOne{
-    return $this->hasOne(Store::class);
+    protected $guarded = [];
+    public function store(): HasOne
+    {
+        return $this->hasOne(Store::class);
     }
-    public function user():HasOne{
+    public function user(): HasOne
+    {
         return $this->hasOne(User::class);
-        }
-        public function product():HasOne{
-            return $this->hasOne(Product::class);
-            }
+    }
+    public function product(): HasOne
+    {
+        return $this->hasOne(Product::class);
+    }
 }

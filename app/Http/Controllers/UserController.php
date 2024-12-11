@@ -24,22 +24,22 @@ class UserController extends Controller
 
         $validator = Validator::make(request()->all(), [
             'firstName' => 'required',
-            'lastName'=>'required',
-            'email'=>'required|email|unique:users,email,' . Auth::id(),
-            'phone'=>'required|size:12|starts_with:+,963|unique:users,phone,' . Auth::id(),
+            'lastName' => 'required',
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
+            'phone' => 'required|size:12|starts_with:+,963|unique:users,phone,' . Auth::id(),
             'image_path' => 'image|mimes:jpeg,png,jpg',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-      if($request->email !=$user->email){
-        $user->generateCode();
-        Mail::to($user->email)->send(new TowFactorMail($user->code));
-      }
+        if ($request->email != $user->email) {
+            $user->generateCode();
+            Mail::to($user->email)->send(new TowFactorMail($user->code));
+        }
         $user->update([
             'firstName' => $request->firstName,
-            'lastName'=>$request->lastName,
-            'email'=>$request->email,
+            'lastName' => $request->lastName,
+            'email' => $request->email,
             'phone' => $request->phone,
 
         ]);
@@ -49,69 +49,74 @@ class UserController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $validator=Validator::make($request->all(),[
-            'current_password'=>'required',
-'password'=>'required|min:8',
-'confirmation_password'=>'required|min:8',
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'password' => 'required|min:8',
+            'confirmation_password' => 'required|min:8',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        if(Hash::check($request->current_password,Auth::user()->password)){
-    if($request->password==$request->confirmation_password){
-        User::where('id',auth()->user()->id)->update([
-            'password'=>$request->password,
+        if (Hash::check($request->current_password, Auth::user()->password)) {
+            if ($request->password == $request->confirmation_password) {
+                User::where('id', auth()->user()->id)->update([
+                    'password' => $request->password,
+                ]);
+                return response()->json(true);
+            }
+        }
+        return response()->json(false);
+    }
+    public function deleteImage()
+    {
+        $user = auth()->user();
+        if (request()->hasFile('image')) {
+            $destenation = 'public/imgs/' . $user->id . '/' . $user->image_path;
+            if (file_exists($destenation)) {
+                File::delete($destenation);
+            }
+        }
+    }
+    public function updateImage()
+    {
+        $user = User::find(auth()->user()->id)->first();
+        if (request()->hasFile('image')) {
+
+            $destenation = 'public/imgs/' . $user->id . '/' . $user->image_path;
+            if (file_exists($destenation)) {
+                File::delete($destenation);
+            }
+
+            $path = $this->uploadImage(request(), 'users', $user->id);
+            $user->image_path = $path;
+        }
+        $user->save();
+        return response()->json('Image Updated Succssful');
+    }
+    public function addAddress()
+    {
+        $validator = Validator::make(request()->all(), [
+            'tall' => 'required',
+            'width' => 'required',
         ]);
-        return response()->json(true);
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        Address::create([
+            'tall' => request()->input('tall'),
+            'width' => request()->input('width'),
+            'note' => request()->input('note'),
+            'user_id' => auth()->user()->id,
+        ]);
+        return response()->json(['message' => 'Added Address Sucssfully'], 201);
     }
-}
-    return response()->json(false);
+    public function showAddresses()
+    {
+        $addresses = User::find(auth()->user()->id)->addreses;
+        if ($addresses->isEmpty())
+            return response()->json(['message' => 'You Don\'t Have Addresses Yet'], 400);
+        return response()->json($addresses, 200);
     }
-public function deleteImage(){
-    $user=auth()->user();
-    if (request()->hasFile('image')){
-        $destenation='public/imgs/'.$user->id.'/'.$user->image_path;
-        if (file_exists($destenation)){
-       File::delete($destenation);
-       }
-}}
-public function updateImage(){
-    $user=User::find(auth()->user()->id)->first();
-    if (request()->hasFile('image')){
-
-        $destenation='public/imgs/'.$user->id.'/'.$user->image_path;
-        if (file_exists($destenation)){
-       File::delete($destenation);
-       }
-
-       $path=$this->uploadImage(request(),'users',$user->id);
-       $user->image_path = $path;
-     }
- $user->save();
- return response()->json('Image Updated Succssful');
-}
-public function addAddress(){
-    $validator = Validator::make(request()->all(), [
-        'tall'=>'required',
-        'width' => 'required',
-    ]);
-    if ($validator->fails()) {
-        return response()->json($validator->errors()->toJson(), 400);
-    }
-Address::create([
-    'tall'=>request()->input('tall'),
-    'width'=>request()->input('width'),
-    'note'=>request()->input('note'),
-    'user_id'=>auth()->user()->id,
-]);
-return response()->json(['message'=>'Added Address Sucssfully'],201);
-}
-public function showAddresses(){
-    $addresses=User::find(auth()->user()->id)->addreses;
-    if($addresses->isEmpty())
-    return response()->json(['message'=>'You Don\'t Have Addresses Yet'],400);
-return response()->json($addresses,200);
-}
 
 
 }

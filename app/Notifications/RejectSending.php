@@ -10,17 +10,17 @@ use Illuminate\Notifications\Notification;
 class RejectSending extends Notification
 {
     use Queueable;
-    private $order_id;
-    private $store_name;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct($order_id,$store_name)
+    private $order_id;
+    private $store_name;
+    public function __construct($order_id, $store_name)
     {
-        $this->order_id=$order_id;
-        $this->store_name=$store_name;
+        $order_id = $this->order_id;
+        $store_name = $this->store_name;
     }
-
     /**
      * Get the notification's delivery channels.
      *
@@ -34,13 +34,7 @@ class RejectSending extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
-    }
+
 
     /**
      * Get the array representation of the notification.
@@ -50,7 +44,7 @@ class RejectSending extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message'=>' Sorry We Reject Your Order Of Id '.$this->order_id.' From Store '.$this->store_name,
+            'message' => "we reject sending your order of Id: $this->order_id from store:$this->store_name"
         ];
     }
 }

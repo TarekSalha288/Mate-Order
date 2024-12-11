@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Product extends Model
 {
     //
-    protected $guarded=[];
-    public function store(): HasOne{
+    protected $guarded = [];
+    public function store(): HasOne
+    {
         return $this->hasOne(Store::class);
     }
 }
