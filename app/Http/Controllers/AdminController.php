@@ -13,11 +13,8 @@ class AdminController extends Controller
     {
         $user = User::where('phone', request()->input('phone'))->first();
         $validator = Validator::make(request()->all(), [
-            'phone' => [
-                'required',
-                'exists:users,phone',
-                Rule::unique('users')->ignore(optional(User::where('phone', request()->input('phone'))->first())->id),
-            ],
+            'phone' =>
+                'required|unique:stores',
             'store_name' => 'required|unique:stores',
         ]);
         if ($validator->fails()) {
@@ -25,6 +22,7 @@ class AdminController extends Controller
         }
         Store::create([
             'user_id' => $user->id,
+            'phone'=>request('phone'),
             'store_name' => request()->input('store_name'),
         ]);
         if ($user->status_role == 'user')
@@ -58,10 +56,9 @@ class AdminController extends Controller
     }
     public function deleteStore($id)
     {
-        $store = Store::where('id', $id)->first();
-        $user=$store->user;
+        $store = Store::findOrFail($id)->first();
         if ($store) {
-            User::find($user->id)->update(['status_role'=>'user']);
+            User::where('id',$store->user_id)->update(['status_role'=>'user']);
             $store->delete();
             return response()->json(['message' => 'Deleted Succssfully'], 200);
         }
@@ -81,7 +78,7 @@ class AdminController extends Controller
             return response()->json(['message' => 'User Not Found '], 400);
         if (auth()->user()->id == $user->id)
             return response()->json(['message' => 'You Can\'t Do That ']);
-        if ($user) {
+        if ($user){
             $user->delete();
             return response()->json(['message' => 'Deleted Sucssfully'], 200);
         }

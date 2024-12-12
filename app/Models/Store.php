@@ -13,7 +13,7 @@ class Store extends Model
     protected $guarded = [];
     public function user(): HasOne
     {
-        return $this->hasOne(User::class);
+        return $this->hasOne(User::class,'id');
     }
     public function products(): HasMany
     {
