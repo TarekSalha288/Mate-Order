@@ -59,7 +59,9 @@ class AdminController extends Controller
     public function deleteStore($id)
     {
         $store = Store::where('id', $id)->first();
+        $user=$store->user;
         if ($store) {
+            User::find($user->id)->update(['status_role'=>'user']);
             $store->delete();
             return response()->json(['message' => 'Deleted Succssfully'], 200);
         }
@@ -68,16 +70,12 @@ class AdminController extends Controller
     public function stores()
     {
         $stores = Store::all();
-
         if ($stores->isEmpty())
             return response()->json(['message' => 'No Stores Avaiable To Show'], 200);
         return response()->json($stores, 200);
-
-
     }
     public function deleteAccount()
     {
-
         $user = User::where('phone', request()->input('phone'))->first();
         if (!$user)
             return response()->json(['message' => 'User Not Found '], 400);
@@ -87,6 +85,5 @@ class AdminController extends Controller
             $user->delete();
             return response()->json(['message' => 'Deleted Sucssfully'], 200);
         }
-
     }
 }
