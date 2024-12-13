@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\TowFactorMail;
 use App\Models\User;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -39,6 +40,8 @@ $existingUser->delete();
         $credentials = request(['phone', 'password']);
          $token = auth()->attempt($credentials);
         Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
+        $user->fcm_token=$token;
+        $user->save();
         return response()->json(['user'=>$user,'token'=>$token], 201);
 
     }
@@ -48,6 +51,9 @@ $existingUser->delete();
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+        $user=auth()->user();
+        $user->fcm_token=$token;
+        $user->save();
         return $this->respondWithToken($token);
     }
 

@@ -78,5 +78,7 @@ class User extends Authenticatable implements JWTSubject
    public function products(): BelongsToMany{
     return $this->belongsToMany(Product::class,'favorite','user_id','product_id');
    }
-
+   public function routeNotificationForFcm() {
+    return $this->fcm_token;
+}
 }

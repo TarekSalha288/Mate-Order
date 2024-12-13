@@ -8,8 +8,6 @@ use App\Models\User;
 use App\Notifications\OrderSendingToSuperUser;
 use DB;
 use Illuminate\Http\Request;
-use Notification;
-use PHPUnit\Framework\Constraint\IsEmpty;
 use Validator;
 
 class OrderController extends Controller
@@ -19,7 +17,7 @@ class OrderController extends Controller
         // in flutter its important to put the add adress puttom to add adress id if they dont have adress id to pass it in param
         $user = auth()->user();
         $product = Product::find($product_id);
-        $super_user = User::where('id', $product->store()->user_id)->get();
+        $super_user = $product->store;
         $validator = Validator::make($request->all(), [
             'total_amount' => 'required',
         ]);
@@ -41,7 +39,7 @@ class OrderController extends Controller
         $product->update([
             'amount' => $product->amount - $request->total_amount
         ]);
-        Notification::send($super_user, new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
+        $super_user->user->notify( new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
         return response()->json(['message' => 'order added successfully']);
         // if we order all amount we must delete this product after accept the order in superUser
         // and if its disaccept we must return the amount to product

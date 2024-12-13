@@ -28,7 +28,7 @@ class RejectReceiving extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database','fcm'];
     }
 
     /**
@@ -53,4 +53,8 @@ class RejectReceiving extends Notification
             'message' => ' Sorry We Reject Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name,
         ];
     }
+
+    public function toFcm($notifiable) { return [ 'to' => $notifiable->routeNotificationForFcm(),
+        'notification' => [  'title'=>'Mate Order App',
+        'body' => ' Sorry We Reject Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name], ];}
 }

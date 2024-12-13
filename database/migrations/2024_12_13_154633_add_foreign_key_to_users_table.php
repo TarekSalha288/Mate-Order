@@ -13,13 +13,9 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('store_id')->nullable()->references('id')->on('stores')->cascadeOnDelete();
-             $table->string('fcm_token')->nullable();
+             $table->text('fcm_token')->nullable();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {

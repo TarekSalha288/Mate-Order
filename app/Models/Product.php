@@ -13,7 +13,7 @@ class Product extends Model
     protected $guarded = [];
     public function store(): HasOne
     {
-        return $this->hasOne(Store::class);
+        return $this->hasOne(Store::class,'id');
     }
     public function users(): BelongsToMany{
         return $this->belongsToMany(User::class,'favorite','user_id');
