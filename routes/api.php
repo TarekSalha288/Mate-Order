@@ -64,7 +64,10 @@ Route::group([
     Route::put('/updateImage', [UserController::class, 'updateImage']);
     Route::post('/addAddress', [UserController::class, 'addAddress']);
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
+    Route::get('showImage',[UserController::class,'showPhoto']);
     Route::get('showAddresses', [UserController::class, 'showAddresses']);
+    Route::get('notifications', [UserController::class, 'notifications']);
+    Route::get('showFav', [UserController::class, 'showFav']);
     /////////////////////////////////////////////////////////////////////////////////
     Route::post('addFav/{id}', [ProductController::class, 'addFavorite']);
     Route::post('disFav/{id}', [ProductController::class, 'disFavorite']);

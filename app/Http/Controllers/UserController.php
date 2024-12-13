@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TowFactorMail;
 use App\Models\Address;
 use App\Models\Store;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -117,6 +118,25 @@ class UserController extends Controller
             return response()->json(['message' => 'You Don\'t Have Addresses Yet'], 400);
         return response()->json($addresses, 200);
     }
-
-
+    public function showPhoto(){
+$user=auth()->user();
+if($user){
+    if($user->image_path!='null')
+    return response()->json([auth()->user()->image_path],200);
+    return response()->json(['message'=>'You Don\'t Have Photo Yet'],200);
+}
+    }
+    public function notifications()
+    {
+        $notifications = User::find(auth()->user()->id)->notifications;
+        if ($notifications->isEmpty())
+            return response()->json(['message' => 'No  Notifications To Show']);
+        return response()->json($notifications, 200);
+    }
+    public function showFav(){
+        $products=Auth::user()->products;
+        if($products->isEmpty())
+       return response()->json(['message' => 'No  Favorite Products To Show']);
+        return response()->json($products, 200);
+    }
 }

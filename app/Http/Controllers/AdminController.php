@@ -20,15 +20,17 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        Store::create([
+        if($user){
+       $store= Store::create([
             'user_id' => $user->id,
             'phone'=>request('phone'),
             'store_name' => request()->input('store_name'),
         ]);
-        if ($user->status_role == 'user')
-            User::where('phone', request()->input('phone'))->update(['status_role' => 'super_user']);
+            User::where('phone', request()->input('phone'))->update(['status_role' => 'super_user',
+            'store_id'=>$store->id]);
         return response()->json(['message' => 'Store Created Sucssfully'], 201);
-
+    }
+    return response()->json(['message' => 'User Not Found'],400);
     }
     public function updateStore($id)
     {
@@ -58,7 +60,6 @@ class AdminController extends Controller
     {
         $store = Store::findOrFail($id)->first();
         if ($store) {
-            User::where('id',$store->user_id)->update(['status_role'=>'user']);
             $store->delete();
             return response()->json(['message' => 'Deleted Succssfully'], 200);
         }

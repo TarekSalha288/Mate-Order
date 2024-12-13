@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -12,13 +13,18 @@ class ProductController extends Controller
     public function addFavorite($id)
     {
         $product = Product::find($id);
+        $found=DB::table('favorite')->where('user_id',auth()->user()->id)->where('product_id',$id)->first();
+       // return $found;
         if ($product) {
+            if(!$found){
             DB::table('favorite')->insert([
                 'user_id' => auth()->user()->id,
                 'product_id' => $id,
             ]);
             return response()->json(['message' => 'Add To Favorite'], 201);
         }
+        return response()->json(['message' => 'Added Before'], 400);
+    }
         return response()->json(['message' => 'Product Not Found '], 400);
     }
     public function disFavorite($id)
