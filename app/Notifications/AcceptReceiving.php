@@ -28,18 +28,21 @@ class AcceptReceiving extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database','fcm'];
+        return ['database', 'fcm'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toFcm($notifiable)
     {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+        return [
+            'to' => $notifiable->routeNotificationForFcm(),
+            'notification' => [
+                'title' => 'Mate Order App',
+                'body' => 'Accept Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name
+            ],
+        ];
     }
 
     /**
@@ -53,7 +56,4 @@ class AcceptReceiving extends Notification
             'message' => 'Accept Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name,
         ];
     }
-    public function toFcm($notifiable) { return [ 'to' => $notifiable->routeNotificationForFcm(),
-        'notification' => [  'title'=>'Mate Order App',
-        'body' => 'Accept Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name ], ];}
 }

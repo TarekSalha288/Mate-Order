@@ -29,14 +29,22 @@ class AcceptSending extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'fcm'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
-
-
+    public function toFcm($notifiable)
+    {
+        return [
+            'to' => $notifiable->routeNotificationForFcm(),
+            'notification' => [
+                'title' => 'Mate Order App',
+                'body' => "we accept sending your order of Id: $this->order_id from store:$this->store_name"
+            ],
+        ];
+    }
     /**
      * Get the array representation of the notification.
      *

@@ -31,13 +31,22 @@ class OrderSendingToSuperUser extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'fcm'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
-
+    public function toFcm($notifiable)
+    {
+        return [
+            'to' => $notifiable->routeNotificationForFcm(),
+            'notification' => [
+                'title' => 'Mate Order App',
+                'body' => "you have new order from user: $this->user_name and his order id: $this->order_id from product id: $this->product_id",
+            ],
+        ];
+    }
 
     /**
      * Get the array representation of the notification.
