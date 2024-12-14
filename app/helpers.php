@@ -19,7 +19,6 @@ function send_notification_FCM($notification_id, $title, $message, $id, $type) {
             'sound' => 'default',
         ],
     ]);
-
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $URL);
     curl_setopt($ch, CURLOPT_POST, true);

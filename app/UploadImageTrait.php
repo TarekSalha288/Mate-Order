@@ -12,6 +12,5 @@ trait UploadImageTrait
             $path = $request->file('image')->storeAs($folderName,$image, 'project');
          return $path;
         }
-
     }
 }

@@ -14,7 +14,6 @@ use App\Models\Address;
 use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
 class UserController extends Controller
 {
     use UploadImageTrait;
@@ -78,22 +77,24 @@ class UserController extends Controller
             }
         }
     }
-    public function updateImage()
+
+
+    public function updateImage(Request $request)
     {
-        $user = User::find(auth()->user()->id)->first();
-        if (request()->hasFile('image')) {
-
-            $destenation = 'public/imgs/' . $user->id . '/' . $user->image_path;
-            if (file_exists($destenation)) {
-                File::delete($destenation);
+        $user = Auth::user();
+        if ($request->hasFile('image')){
+            $destination = public_path('imgs/users/' . $user->id . '/' . $user->image_path);
+            if (File::exists($destination)) {
+                File::delete($destination);
             }
-
-            $path = $this->uploadImage(request(), 'users', $user->id);
+            $path = $this->uploadImage($request, 'users', $user->id);
             $user->image_path = $path;
+            $user->save();
+            return response()->json(['message' => 'Image Updated Successfully']);
         }
-        $user->save();
-        return response()->json('Image Updated Succssful');
+        return response()->json(['message' => 'No image uploaded'], 400);
     }
+
     public function addAddress()
     {
         $validator = Validator::make(request()->all(), [

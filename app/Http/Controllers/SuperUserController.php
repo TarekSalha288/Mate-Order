@@ -167,23 +167,22 @@ class SuperUserController extends Controller
     }
     public function waitingOrders()
     {
-        $orders = Store::where('user_id', auth()->user()->id)->orders()->where('status', 'waiting');
-        if ($orders->isEmpty())
+        $orders = User::find(auth()->user()->id)->store->orders()->where('status','waiting');
+        if ($orders)
             return response()->json(['message' => 'No Items To Show']);
         return response()->json($orders, 200);
-
     }
     public function sendingOrders()
     {
-        $orders = Store::where('user_id', auth()->user()->id)->orders()->where('status', 'sending');
-        if ($orders->isEmpty())
+        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'sending');
+        if ($orders)
             return response()->json(['message' => 'No Items To Show']);
         return response()->json($orders, 200);
     }
     public function receivingOrders()
     {
-        $orders = Store::where('user_id', auth()->user()->id)->orders()->where('status', 'receiving');
-        if ($orders->isEmpty())
+        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'receiving');
+        if ($orders)
             return response()->json(['message' => 'No Items To Show']);
         return response()->json($orders, 200);
     }
