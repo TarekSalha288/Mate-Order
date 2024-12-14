@@ -64,7 +64,7 @@ Route::group([
     Route::put('/updateImage', [UserController::class, 'updateImage']);
     Route::post('/addAddress', [UserController::class, 'addAddress']);
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
-    Route::get('showImage',[UserController::class,'showPhoto']);
+    Route::get('showImage', [UserController::class, 'showPhoto']);
     Route::get('showAddresses', [UserController::class, 'showAddresses']);
     Route::get('notifications', [UserController::class, 'notifications']);
     Route::get('showFav', [UserController::class, 'showFav']);
@@ -80,9 +80,11 @@ Route::group([
     Route::get('storeProducts/{id}', [StoreController::class, 'edit']);
     ////////////////////////////////////////////////////////////////////////////////////
     Route::post('addOrder/{Product_id}/{adress_id}', [OrderController::class, 'addOrder']);
-    Route::get('getAllOrderInCart', [OrderController::class, 'getAllOrdersInCart']);
     Route::put('updateOrder/{order_id}/{adress_id}', [OrderController::class, 'updateOrder']);
     Route::delete('deleteOrder/{order_id}', [OrderController::class, 'deleteOrder']);
+    Route::get('getAllWaitingOrdersInCart', [OrderController::class, 'getAllWaitingOrdersInCart']);
+    Route::get('getAllInWayOrder', [OrderController::class, 'getAllInWayOrder']);
+    Route::get('getAllReceivingOrder', [OrderController::class, 'getAllReceivingOrder']);
 });
 Route::group([
     'middleware' => [TowFactor::class, AdminMiddleWare::class, 'api', 'auth'],

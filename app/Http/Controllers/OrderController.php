@@ -39,12 +39,12 @@ class OrderController extends Controller
         $product->update([
             'amount' => $product->amount - $request->total_amount
         ]);
-        $super_user->user->notify( new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
+        $super_user->user->notify(new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
         return response()->json(['message' => 'order added successfully']);
         // if we order all amount we must delete this product after accept the order in superUser
         // and if its disaccept we must return the amount to product
     }
-    public function getAllOrdersInCart()
+    public function getAllWaitingOrdersInCart()
     {
         $user_id = auth()->user()->id;
         $orders = Order::where('status', 'waiting')
@@ -55,6 +55,30 @@ class OrderController extends Controller
             return response()->json(['data' => $orders, 'message' => 'this is all bending order'], 200);
         }
         return response()->json(['data' => null, 'message' => 'you dont have any order'], 400);
+    }// update in name in postman for not conflect
+    public function getAllInWayOrder()
+    {
+        $user_id = auth()->user()->id;
+        $orders = Order::where('status', 'sending')
+            ->where('user_id', $user_id)
+            ->get();
+        // I must use scope later and tarek in this case we can use just where
+        if (!$orders->isEmpty()) {
+            return response()->json(['data' => $orders, 'message' => 'this is all in way order'], 200);
+        }
+        return response()->json(['data' => null, 'message' => 'you dont have any in way order'], 400);
+    }
+    public function getAllReceivingOrder()
+    {
+        $user_id = auth()->user()->id;
+        $orders = Order::where('status', 'receiving')
+            ->where('user_id', $user_id)
+            ->get();
+        // I must use scope later and tarek in this case we can use just where
+        if (!$orders->isEmpty()) {
+            return response()->json(['data' => $orders, 'message' => 'this is all accepted order'], 200);
+        }
+        return response()->json(['data' => null, 'message' => 'you dont have any accepted order'], 400);
     }
     public function updateOrder(Request $request, $order_id, $adress_id)
     {
