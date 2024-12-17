@@ -95,4 +95,5 @@ Route::group([
     Route::get('editStore/{id}', [AdminController::class, 'edit']);
     Route::delete('deleteStore/{id}', [AdminController::class, 'deleteStore']);
     Route::get('allStores', [AdminController::class, 'stores']);
+    Route::get('searchStoreInAdmin', [AdminController::class, 'searchStoreInAdmin']);
 });

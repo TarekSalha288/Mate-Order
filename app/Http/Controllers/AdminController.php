@@ -20,17 +20,19 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        if($user){
-       $store= Store::create([
-            'user_id' => $user->id,
-            'phone'=>request('phone'),
-            'store_name' => request()->input('store_name'),
-        ]);
-            User::where('phone', request()->input('phone'))->update(['status_role' => 'super_user',
-            'store_id'=>$store->id]);
-        return response()->json(['message' => 'Store Created Sucssfully'], 201);
-    }
-    return response()->json(['message' => 'User Not Found'],400);
+        if ($user) {
+            $store = Store::create([
+                'user_id' => $user->id,
+                'phone' => request('phone'),
+                'store_name' => request()->input('store_name'),
+            ]);
+            User::where('phone', request()->input('phone'))->update([
+                'status_role' => 'super_user',
+                'store_id' => $store->id
+            ]);
+            return response()->json(['message' => 'Store Created Sucssfully'], 201);
+        }
+        return response()->json(['message' => 'User Not Found'], 400);
     }
     public function updateStore($id)
     {
@@ -79,9 +81,24 @@ class AdminController extends Controller
             return response()->json(['message' => 'User Not Found '], 400);
         if (auth()->user()->id == $user->id)
             return response()->json(['message' => 'You Can\'t Do That ']);
-        if ($user){
+        if ($user) {
             $user->delete();
             return response()->json(['message' => 'Deleted Sucssfully'], 200);
         }
+    }
+    public function searchStoreInAdmin()
+    {
+        $validator = Validator::make(request()->all(), [
+            'name' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        $query = request()->input('name');
+        $stores = Store::where('store_name', 'LIKE', "%{$query}%")->get();
+        //$stores->toArray();
+        if ($stores->isEmpty())
+            return response()->json(['message' => 'No Result'], 400);
+        return response()->json($stores, 200);
     }
 }

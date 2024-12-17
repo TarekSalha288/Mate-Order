@@ -136,7 +136,7 @@ class OrderController extends Controller
         $order = Order::find($order_id);
         $amount = $order->total_amount;
         $product = Product::find($order->product_id);
-        $deleteProduct = DB::table('orders')->where('id', $order_id)->delete();
+        $deleteProduct = $order->find($order_id)->delete();
         $product->update([
             'amount' => $product->amount + $amount
         ]);
