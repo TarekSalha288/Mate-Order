@@ -4,14 +4,16 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Services\FCMService;
 
-class RejectReceiving extends Notification
+class RejectReceiving extends Notification implements ShouldQueue
 {
     use Queueable;
+
     private $order_id;
     private $store_name;
+
     /**
      * Create a new notification instance.
      */
@@ -28,21 +30,32 @@ class RejectReceiving extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'fcm'];
+        return ['database', 'fcm']; // Delivery channels (database and fcm)
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Handle the FCM notification delivery.
+     *
+     * @param object $notifiable
+     * @return void
      */
-    public function toFcm($notifiable)
+    public function toFcm(object $notifiable)
     {
-        return [
-            'to' => $notifiable->routeNotificationForFcm(),
-            'notification' => [
-                'title' => 'Mate Order App',
-                'body' => ' Sorry We Reject Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name
-            ],
-        ];
+        $fcmToken = $notifiable->routeNotificationForFcm(); // Retrieve FCM token
+        $fcmService = new FCMService();
+
+        // Send FCM notification
+        $response = $fcmService->sendNotification(
+            $fcmToken,
+            'Mate Order App',
+            "Sorry, we reject your order of Id: {$this->order_id} from store: {$this->store_name}",
+            ['order_id' => $this->order_id]
+        );
+
+        // Optional: Log the response if the notification fails
+        if (!$response['success'] ?? false) {
+            \Log::error('FCM Notification Failed', ['response' => $response]);
+        }
     }
 
     /**
@@ -53,8 +66,7 @@ class RejectReceiving extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => ' Sorry We Reject Your Order Of Id ' . $this->order_id . ' From Store ' . $this->store_name,
+            'message' => "Sorry, we reject your order of Id: {$this->order_id} from store: {$this->store_name}",
         ];
     }
-
 }

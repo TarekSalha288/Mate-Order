@@ -127,32 +127,88 @@ class SuperUserController extends Controller
     }
     public function acceptSending($id)
     {
-        $order = Order::find($id);
-        $store = $order->store;
-        $owner = $store->user;
-        $user = $order->user;
-        if ($owner != auth()->user())
-            return response()->json(['message' => 'You Can\'t Do That ']);
+        $order = Order::find($id); // Fetch the order
+        if (!$order || $order->status !='waiting') {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $store = $order->store; // Access the related store
+        if (!$store) {
+            return response()->json(['message' => 'Store not found'], 404);
+        }
+
+        $owner = $store->user; // Access the user (owner of the store)
+        if ($owner->id !== auth()->id()) { // Check if the owner is the authenticated user
+            return response()->json(['message' => "You can't do that."], 403);
+        }
+
+        // Update order status
         $order->update(['status' => 'sending']);
-        Notification::send($user, new AcceptSending($id, $store->store_name));
-        return response()->json(['message' => 'Accept sending Order Of Id' . $id]);
+
+        // Notify the order's user
+        $user = $order->user; // Access the related user
+        if ($user) {
+            Notification::send($user, new AcceptSending($id, $store->store_name));
+        }
+
+        return response()->json(['message' => 'Accepted sending order of ID ' . $id]);
     }
+
     public function rejectSending($id)
     {
+        // Fetch the order
         $order = Order::find($id);
+
+        // Check if the order exists
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // Access the related store
         $store = $order->store;
+        if (!$store) {
+            return response()->json(['message' => 'Store not found'], 404);
+        }
+
+        // Access the store owner
         $owner = $store->user;
+        if (!$owner || $owner->id !== auth()->id()) {
+            return response()->json(['message' => 'You can\'t do that'], 403);
+        }
+
+        // Access the order's user
         $user = $order->user;
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Access the product related to the order
         $product = $order->product;
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        // Update product amount
         $amount = $product->amount;
-        if ($owner != auth()->user())
-            return response()->json(['message' => 'You Can\'t Do That ']);
-        $amount += $order->total_amount;
-        $product->update(['amount' => $amount]);
+        $totalAmount = $order->total_amount;
+
+        if (!is_numeric($amount) || !is_numeric($totalAmount)) {
+            return response()->json(['message' => 'Invalid amount data'], 422);
+        }
+
+        $product->update(['amount' => $amount + $totalAmount]);
+
+        // Delete the order
         $order->delete();
-        Notification::send($user, new RejectSending($id, $store->store_name));
-        return response()->json(['message' => 'reject sending Order Of Id' . $id]);
+
+        // Notify the user
+        $user->notify(new RejectSending($id, $store->store_name));
+
+        // Return response
+        return response()->json(['message' => 'Rejected sending order of ID ' . $id]);
     }
+
+
     public function waitingOrders()
     {
         $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'waiting')->get();
@@ -177,7 +233,7 @@ class SuperUserController extends Controller
     public function sendingOrders()
     {
         $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'sending')->get();
-        if ($orders)
+        if (!$orders)
             return response()->json(['message' => 'No Items To Show']);
         $formattedOrders = $orders->map(function ($order) {
             return [

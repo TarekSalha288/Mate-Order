@@ -4,22 +4,24 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Services\FCMService;
 
-class AcceptSending extends Notification
+class AcceptSending extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    private $order_id;
+    private $store_name;
 
     /**
      * Create a new notification instance.
      */
-    private $order_id;
-    private $store_name;
     public function __construct($order_id, $store_name)
     {
-        $order_id = $this->order_id;
-        $store_name = $this->store_name;
+        // Correctly assign values to the properties
+        $this->order_id = $order_id;
+        $this->store_name = $store_name;
     }
 
     /**
@@ -29,22 +31,34 @@ class AcceptSending extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'fcm'];
+        return ['database', 'fcm']; // The 'fcm' channel here is custom and handled manually
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Handle FCM notification delivery.
+     *
+     * @param object $notifiable
+     * @return void
      */
-    public function toFcm($notifiable)
+    public function toFcm(object $notifiable)
     {
-        return [
-            'to' => $notifiable->routeNotificationForFcm(),
-            'notification' => [
-                'title' => 'Mate Order App',
-                'body' => "we accept sending your order of Id: $this->order_id from store:$this->store_name"
-            ],
-        ];
+        $fcmToken = $notifiable->routeNotificationForFcm(); // Ensure this method exists in your User model
+        $fcmService = new FCMService();
+
+        // Send the FCM notification
+        $response = $fcmService->sendNotification(
+            $fcmToken,
+            'Mate Order App',
+            "We accept sending your order of Id: {$this->order_id} from store: {$this->store_name}",
+            ['order_id' => $this->order_id]
+        );
+
+        // Log or handle the response for debugging
+        if (!$response['success'] ?? false) {
+            \Log::error('FCM Notification Failed', ['response' => $response]);
+        }
     }
+
     /**
      * Get the array representation of the notification.
      *
@@ -53,7 +67,7 @@ class AcceptSending extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => "we accept sending your order of Id: $this->order_id from store:$this->store_name"
+            'message' => "We accept sending your order of Id: ".$this->order_id." from store: ".$this->store_name
         ];
     }
 }

@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Order extends Model
 {
     protected $guarded = [];
-    public function store(): HasOne
+    public function store()
     {
-        return $this->hasOne(Store::class);
+        return $this->belongsTo(Store::class);
     }
     public function user(): BelongsTo
     {
