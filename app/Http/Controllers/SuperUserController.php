@@ -167,24 +167,66 @@ class SuperUserController extends Controller
     }
     public function waitingOrders()
     {
-        $orders = User::find(auth()->user()->id)->store->orders()->where('status','waiting');
-        if ($orders)
+        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'waiting')->get();
+        if (!$orders)
             return response()->json(['message' => 'No Items To Show']);
-        return response()->json($orders, 200);
+        $formattedOrders = $orders->map(function ($order) {
+            return [
+                'order_id' => $order->id,
+                'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
+                'phone_number' => $order->user->phone,
+                'total_amount' => $order->total_amount,
+                'total_price' => $order->total_price,
+                'product_id' => $order->product_id,
+                'product_name' => $order->product->name,
+                'width' => $order->address->width,
+                'tall' => $order->address->tall,
+                'note' => $order->address->note,
+            ];
+        });
+        return response()->json($formattedOrders, 200);
     }
     public function sendingOrders()
     {
-        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'sending');
+        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'sending')->get();
         if ($orders)
             return response()->json(['message' => 'No Items To Show']);
-        return response()->json($orders, 200);
+        $formattedOrders = $orders->map(function ($order) {
+            return [
+                'order_id' => $order->id,
+                'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
+                'phone_number' => $order->user->phone,
+                'total_amount' => $order->total_amount,
+                'total_price' => $order->total_price,
+                'product_id' => $order->product_id,
+                'product_name' => $order->product->name,
+                'width' => $order->address->width,
+                'tall' => $order->address->tall,
+                'note' => $order->address->note,
+            ];
+        });
+        return response()->json($formattedOrders, 200);
     }
     public function receivingOrders()
     {
-        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'receiving');
+        $orders = User::find(auth()->user()->id)->store->orders()->where('status', 'receiving')->get();
         if ($orders)
             return response()->json(['message' => 'No Items To Show']);
-        return response()->json($orders, 200);
+        $formattedOrders = $orders->map(function ($order) {
+            return [
+                'order_id' => $order->id,
+                'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
+                'phone_number' => $order->user->phone,
+                'total_amount' => $order->total_amount,
+                'total_price' => $order->total_price,
+                'product_id' => $order->product_id,
+                'product_name' => $order->product->name,
+                'width' => $order->address->width,
+                'tall' => $order->address->tall,
+                'note' => $order->address->note,
+            ];
+        });
+        return response()->json($formattedOrders, 200);
     }
     public function archive()
     {
