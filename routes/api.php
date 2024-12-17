@@ -25,7 +25,7 @@ Route::group([
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
-    Route::post('/me', [AuthController::class, 'me'])->middleware(['auth:api', TowFactor::class])->name('me');
+    Route::get('/me', [AuthController::class, 'me'])->middleware(['auth:api', TowFactor::class])->name('me');
 });
 Route::post('verify', [AuthController::class, 'verify']);
 Route::get('/resendCode', [AuthController::class, 'resendCode']);

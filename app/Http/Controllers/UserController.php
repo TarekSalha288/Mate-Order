@@ -19,9 +19,7 @@ class UserController extends Controller
     use UploadImageTrait;
     public function updateInfo(Request $request)
     {
-
         $user = User::find(auth()->user()->id);
-
         $validator = Validator::make(request()->all(), [
             'firstName' => 'required',
             'lastName' => 'required',
@@ -44,7 +42,6 @@ class UserController extends Controller
 
         ]);
         return response()->json(['message' => 'Info Updated Succseflly'], 200);
-
     }
 
     public function updatePassword(Request $request)
@@ -77,8 +74,6 @@ class UserController extends Controller
             }
         }
     }
-
-
     public function updateImage(Request $request)
     {
         $user = Auth::user();
@@ -90,13 +85,11 @@ class UserController extends Controller
             $path = $this->uploadImage($request, 'users', $user->id);
             $user->image_path = $path;
             $user->save();
-            return response()->json(['message' => 'Image Updated Successfully']);
+            return response()->json(['message' => 'Image Updated Successfully'],200);
         }
         return response()->json(['message' => 'No image uploaded'], 400);
     }
-
-    public function addAddress()
-    {
+    public function addAddress(){
         $validator = Validator::make(request()->all(), [
             'tall' => 'required',
             'width' => 'required',
