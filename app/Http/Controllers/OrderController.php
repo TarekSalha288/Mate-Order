@@ -47,9 +47,7 @@ class OrderController extends Controller
     public function getAllWaitingOrdersInCart()
     {
         $user_id = auth()->user()->id;
-        $orders = Order::where('status', 'waiting')
-            ->where('user_id', $user_id)
-            ->get();
+        $orders = User::find($user_id)->orders()->where('status', 'waiting')->get();
         // I must use scope later and tarek in this case we can use just where
         if (!$orders->isEmpty()) {
             return response()->json(['data' => $orders, 'message' => 'this is all bending order'], 200);
@@ -59,9 +57,7 @@ class OrderController extends Controller
     public function getAllInWayOrder()
     {
         $user_id = auth()->user()->id;
-        $orders = Order::where('status', 'sending')
-            ->where('user_id', $user_id)
-            ->get();
+        $orders = User::find($user_id)->orders()->where('status', 'sending')->get();
         // I must use scope later and tarek in this case we can use just where
         if (!$orders->isEmpty()) {
             return response()->json(['data' => $orders, 'message' => 'this is all in way order'], 200);
@@ -71,9 +67,7 @@ class OrderController extends Controller
     public function getAllReceivingOrder()
     {
         $user_id = auth()->user()->id;
-        $orders = Order::where('status', 'receiving')
-            ->where('user_id', $user_id)
-            ->get();
+        $orders = User::find($user_id)->orders()->where('status', 'receiving')->get();
         // I must use scope later and tarek in this case we can use just where
         if (!$orders->isEmpty()) {
             return response()->json(['data' => $orders, 'message' => 'this is all accepted order'], 200);

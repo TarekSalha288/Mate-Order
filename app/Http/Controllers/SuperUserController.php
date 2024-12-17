@@ -30,7 +30,7 @@ class SuperUserController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
         $user_id = auth()->user()->id;
-        $storeOwner = Store::where('user_id', $user_id)->first();
+        $storeOwner = User::find($user_id)->store->first();
         $store_id = $storeOwner->id;
         Product::create([
             'store_id' => $store_id,
@@ -47,9 +47,7 @@ class SuperUserController extends Controller
     public function getAllProductInStore(Request $request)
     {
         $user_id = auth()->user()->id;
-        $storeOwner = Store::where('user_id', $user_id)->first();
-        $store_id = $storeOwner->id;
-        $products = Product::where('store_id', $store_id)->where('active', 1)->paginate(10);
+        $products = User::find($user_id)->store->products()->where('active', 1)->paginate(10);
         if (!$products) {
             return response()->json(['data' => null, 'message' => 'get products failed'], 400);
         }
@@ -58,12 +56,7 @@ class SuperUserController extends Controller
     public function updateProductInStore(Request $request, $product_id)
     {
         $user_id = auth()->user()->id;
-        $storeOwner = Store::where('user_id', $user_id)->first();
-        if (!$storeOwner) {
-            return response()->json(['message' => 'Store not found'], 404);
-        }
-        $store_id = $storeOwner->id;
-        $products = Product::where('store_id', $store_id)->where('active', 1)->get();
+        $products = User::find($user_id)->store->products()->where('active', 1)->get();
         if (!$products) {
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
@@ -93,12 +86,7 @@ class SuperUserController extends Controller
     public function deleteProductInStore(Request $request, $product_id)
     {
         $user_id = auth()->user()->id;
-        $storeOwner = Store::where('user_id', $user_id)->first();
-        if (!$storeOwner) {
-            return response()->json(['message' => 'Store not found'], 404);
-        }
-        $store_id = $storeOwner->id;
-        $products = Product::where('store_id', $store_id)->where('active', 1)->get();
+        $products = User::find($user_id)->store->products()->where('active', 1)->get();
         if (!$products) {
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
