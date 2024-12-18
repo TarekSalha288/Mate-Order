@@ -40,7 +40,7 @@
             width="150">
         </div>
         <h1>Verify Your Account</h1>
-        <p>Hello {{$name}}</p>
+        <p>Hello {{$firstName}}</p>
         <p>We received a request to set up email for your account. Please use the following code to verify your email address:</p>
         <div class="code">{{$code}}</div>
         <p>If you did not request this, please ignore this email.</p>
