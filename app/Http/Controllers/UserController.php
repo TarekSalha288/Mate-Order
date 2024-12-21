@@ -125,8 +125,8 @@ class UserController extends Controller
     public function notifications()
     {
         $notifications = User::find(auth()->user()->id)->notifications;
-       // if ($notifications->isEmpty())
-          //  return response()->json(['message' => 'No  Notifications To Show']);
+        if ($notifications->isEmpty())
+            return response()->json(['message' => 'No  Notifications To Show']);
         return response()->json($notifications, 200);
     }
     public function showFav()

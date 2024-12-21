@@ -116,29 +116,53 @@ class SuperUserController extends Controller
     public function acceptReceiving($id)
     {
         $order = Order::find($id);
+        if (!$order || $order->status != 'sending') {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
         $store = $order->store;
+        if (!$store) {
+            return response()->json(['message' => 'Store not found'], 404);
+        }
+
         $owner = $order->store->user;
-        $user = $order->user;
-        if ($owner != auth()->user())
-            return response()->json(['message' => 'You Can\'t Do That ']);
+        if ($owner->id !== auth()->id()) { // Check if the owner is the authenticated user
+            return response()->json(['message' => "You can't do that."], 403);
+        }
+
         $order->update(['status' => 'receiving']);
-        $user->notify(new AcceptReceiving($id, $store->store_name));
+
+        $user = $order->user;
+        if ($user)
+            $user->notify(new AcceptReceiving($id, $store->store_name));
+
         return response()->json(['message' => 'Accept receiving Order Of Id' . $id]);
     }
     public function rejectReceiving($id)
     {
         $order = Order::find($id);
+        if (!$order || $order->status != 'sending') {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
         $owner = $order->store->user;
+        if ($owner->id !== auth()->id()) { // Check if the owner is the authenticated user
+            return response()->json(['message' => "You can't do that."], 403);
+        }
+
         $store = $order->store;
+        if (!$store) {
+            return response()->json(['message' => 'Store not found'], 404);
+        }
         $user = $order->user;
-        if ($owner != auth()->user())
-            return response()->json(['message' => 'You Can\'t Do That ']);
+
         $product = $order->product;
         $amount = $product->amount;
         $amount += $order->total_amount;
         $product->update(['amount' => $amount]);
         $order->delete();
-        $user->notify(new RejectReceiving($id, $store->store_name));
+        if ($user)
+            $user->notify(new RejectReceiving($id, $store->store_name));
         return response()->json(['message' => 'Reject receiving Order Of Id' . $id]);
     }
     public function acceptSending($id)
@@ -163,7 +187,7 @@ class SuperUserController extends Controller
         // Notify the order's user
         $user = $order->user; // Access the related user
         if ($user) {
-        $user->notify( new AcceptSending($id, $store->store_name));
+            $user->notify(new AcceptSending($id, $store->store_name));
         }
         return response()->json(['message' => 'Accepted sending order of ID ' . $id]);
     }
