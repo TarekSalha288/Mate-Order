@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use App\Services\FCMService;
+use Illuminate\Support\Facades\Log;
 
 class AcceptReceiving extends Notification implements ShouldQueue
 {
@@ -19,6 +20,7 @@ class AcceptReceiving extends Notification implements ShouldQueue
      */
     public function __construct($order_id, $store_name)
     {
+        // Correctly assign values to the properties
         $this->order_id = $order_id;
         $this->store_name = $store_name;
     }
@@ -30,31 +32,31 @@ class AcceptReceiving extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'fcm']; // Custom FCM channel
+        return ['database', 'fcm']; // The 'fcm' channel here is custom and handled manually
     }
 
     /**
-     * Handle the FCM notification delivery.
+     * Handle FCM notification delivery.
      *
      * @param object $notifiable
      * @return void
      */
     public function toFcm(object $notifiable)
     {
-        $fcmToken = $notifiable->routeNotificationForFcm(); // Ensure this method exists and returns the FCM token
+        $fcmToken = $notifiable->routeNotificationForFcm(); // Ensure this method exists in your User model
         $fcmService = new FCMService();
 
         // Send the FCM notification
         $response = $fcmService->sendNotification(
             $fcmToken,
             'Mate Order App',
-            "Accept your order of Id: {$this->order_id} from store: {$this->store_name}",
+            "We accept receiving your order of Id: {$this->order_id} from store: {$this->store_name}",
             ['order_id' => $this->order_id]
         );
 
-        // Optionally log the response to handle any failures
+        // Log or handle the response for debugging
         if (!$response['success'] ?? false) {
-            \Log::error('FCM Notification Failed', ['response' => $response]);
+            Log::error('FCM Notification Failed', ['response' => $response]);
         }
     }
 
@@ -66,7 +68,7 @@ class AcceptReceiving extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => "Accept your order of Id: {$this->order_id} from store: {$this->store_name}",
+            'message' => "We accept recieving your order of Id: ".$this->order_id." from store: ".$this->store_name
         ];
     }
 }

@@ -63,22 +63,10 @@ class AuthController extends Controller
         $user->save();
         return $this->respondWithToken($token);
     }
-
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function me()
     {
         return response()->json(auth()->user());
     }
-
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function logout()
     {
         auth()->logout();

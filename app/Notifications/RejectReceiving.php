@@ -66,7 +66,7 @@ class RejectReceiving extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => "Sorry, we reject your order of Id: {$this->order_id} from store: {$this->store_name}",
+            'message' => "Sorry, we reject receiving your order of Id: {$this->order_id} from store: {$this->store_name}",
         ];
     }
 }

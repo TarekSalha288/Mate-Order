@@ -38,7 +38,7 @@ class ProductController extends Controller
     }
     public function showProducts($category)
     {
-        $products = Product::where('category', $category)->where('active', 1)->paginate(7);
+        $products = Product::where('category', $category)->where('active', 1)->paginate(6);
         $allProducts = [];
         if ($products->isEmpty()) {
             return response()->json(['message' => 'No Products Available'], 400);

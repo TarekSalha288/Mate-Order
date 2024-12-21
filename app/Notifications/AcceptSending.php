@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use App\Services\FCMService;
+use Illuminate\Support\Facades\Log;
 
 class AcceptSending extends Notification implements ShouldQueue
 {
@@ -55,7 +56,7 @@ class AcceptSending extends Notification implements ShouldQueue
 
         // Log or handle the response for debugging
         if (!$response['success'] ?? false) {
-            \Log::error('FCM Notification Failed', ['response' => $response]);
+            Log::error('FCM Notification Failed', ['response' => $response]);
         }
     }
 

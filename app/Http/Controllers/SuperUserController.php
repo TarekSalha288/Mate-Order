@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ActiveProductJob;
 use App\Models\Order;
+use Illuminate\Support\Facades\File;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
@@ -12,8 +13,9 @@ use App\Notifications\AcceptReceiving;
 use App\Notifications\AcceptSending;
 use App\Notifications\RejectReceiving;
 use App\Notifications\RejectSending;
-use File;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File as FacadesFile;
 use Notification;
 use Validator;
 
@@ -115,7 +117,7 @@ class SuperUserController extends Controller
     {
         $order = Order::find($id);
         $store = $order->store;
-        $owner = $order->store()->user;
+        $owner = $order->store->user;
         $user = $order->user;
         if ($owner != auth()->user())
             return response()->json(['message' => 'You Can\'t Do That ']);
@@ -126,7 +128,7 @@ class SuperUserController extends Controller
     public function rejectReceiving($id)
     {
         $order = Order::find($id);
-        $owner = $order->store()->user;
+        $owner = $order->store->user;
         $store = $order->store;
         $user = $order->user;
         if ($owner != auth()->user())
@@ -156,15 +158,13 @@ class SuperUserController extends Controller
             return response()->json(['message' => "You can't do that."], 403);
         }
 
-        // Update order status
         $order->update(['status' => 'sending']);
 
         // Notify the order's user
         $user = $order->user; // Access the related user
         if ($user) {
-            Notification::send($user, new AcceptSending($id, $store->store_name));
+        $user->notify( new AcceptSending($id, $store->store_name));
         }
-
         return response()->json(['message' => 'Accepted sending order of ID ' . $id]);
     }
 
