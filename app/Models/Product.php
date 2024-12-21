@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,9 +12,9 @@ class Product extends Model
 {
     //
     protected $guarded = [];
-    public function store(): HasOne
+    public function store(): BelongsTo
     {
-        return $this->hasOne(Store::class,'id');
+        return $this->belongsTo(Store::class);
     }
     public function users(): BelongsToMany{
         return $this->belongsToMany(User::class,'favorite','user_id');

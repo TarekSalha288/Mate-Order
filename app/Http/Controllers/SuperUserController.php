@@ -312,9 +312,9 @@ class SuperUserController extends Controller
     }
     public function archive()
     {
-        $products = Store::where('user_id', auth()->user()->id)->products()->where('active', 0)->paginate(10);
+        $products = User::find(auth()->user()->id)->store->products()->where('active',0)->paginate(10);
         if ($products->isEmpty())
-            return response()->json(['message' => 'No Items To Show']);
+           return response()->json(['message' => 'No Items To Show']);
         return response()->json([
             'data' => $products,
             'pagination' => [
@@ -326,6 +326,7 @@ class SuperUserController extends Controller
                 'prev_page_url' => $products->previousPageUrl(),
             ],
         ], 200);
+
     }
     public function notifications()
     {

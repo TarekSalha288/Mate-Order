@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Product;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -17,7 +18,7 @@ class ActiveProductJob implements ShouldQueue
     private $super_user_id;
     public function __construct($super_user_id)
     {
-        $super_user_id = $this->super_user_id;
+        $this->super_user_id= $super_user_id;
     }
 
     /**
@@ -25,8 +26,8 @@ class ActiveProductJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $store_id = Store::where('user_id', $this->super_user_id);
-        $products = Product::where('store_id', $store_id)->where('amount', 0);
+
+        $products = User::find($this->super_user_id)->store->products()->where('amount', 0)->get();
         foreach ($products as $product) {
             $product->update([
                 'active' => 0
