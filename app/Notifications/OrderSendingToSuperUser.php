@@ -19,9 +19,9 @@ class OrderSendingToSuperUser extends Notification
     private $user_name;
     public function __construct($user_name, $product_id, $order_id)
     {
-        $user_name = $this->user_name;
-        $product_id = $this->product_id;
-        $order_id = $this->order_id;
+        $this->user_name = $user_name;
+        $this->product_id = $product_id;
+        $this->order_id = $order_id;
     }
 
     /**
@@ -36,7 +36,10 @@ class OrderSendingToSuperUser extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => "you have new order from user: $this->user_name and his order id: $this->order_id from product id: $this->product_id",
+            // 'message' => "you have new order from user: $this->user_name and his order id: $this->order_id from product id: $this->product_id",
+            'user_name' => $this->user_name,
+            'order_id' => $this->order_id,
+            'product_id' => $this->product_id
         ];
     }
 }

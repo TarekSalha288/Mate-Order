@@ -77,7 +77,7 @@ class UserController extends Controller
     public function updateImage(Request $request)
     {
         $user = Auth::user();
-        if ($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $destination = public_path('imgs/users/' . $user->id . '/' . $user->image_path);
             if (File::exists($destination)) {
                 File::delete($destination);
@@ -85,11 +85,12 @@ class UserController extends Controller
             $path = $this->uploadImage($request, 'users', $user->id);
             $user->image_path = $path;
             $user->save();
-            return response()->json(['message' => 'Image Updated Successfully'],200);
+            return response()->json(['message' => 'Image Updated Successfully'], 200);
         }
         return response()->json(['message' => 'No image uploaded'], 400);
     }
-    public function addAddress(){
+    public function addAddress()
+    {
         $validator = Validator::make(request()->all(), [
             'tall' => 'required',
             'width' => 'required',
@@ -112,13 +113,14 @@ class UserController extends Controller
             return response()->json(['message' => 'You Don\'t Have Addresses Yet'], 400);
         return response()->json($addresses, 200);
     }
-    public function showPhoto(){
-$user=auth()->user();
-if($user){
-    if($user->image_path!='null')
-    return response()->json([auth()->user()->image_path],200);
-    return response()->json(['message'=>'You Don\'t Have Photo Yet'],200);
-}
+    public function showPhoto()
+    {
+        $user = auth()->user();
+        if ($user) {
+            if ($user->image_path != 'null')
+                return response()->json([auth()->user()->image_path], 200);
+            return response()->json(['message' => 'You Don\'t Have Photo Yet'], 200);
+        }
     }
     public function notifications()
     {
@@ -127,10 +129,11 @@ if($user){
             return response()->json(['message' => 'No  Notifications To Show']);
         return response()->json($notifications, 200);
     }
-    public function showFav(){
-        $products=Auth::user()->products;
-        if($products->isEmpty())
-       return response()->json(['message' => 'No  Favorite Products To Show']);
+    public function showFav()
+    {
+        $products = Auth::user()->products;
+        if ($products->isEmpty())
+            return response()->json(['message' => 'No  Favorite Products To Show']);
         return response()->json($products, 200);
     }
 }

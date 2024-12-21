@@ -7,16 +7,19 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
+use App\UploadImageTrait;
 use App\Notifications\AcceptReceiving;
 use App\Notifications\AcceptSending;
 use App\Notifications\RejectReceiving;
 use App\Notifications\RejectSending;
+use File;
 use Illuminate\Http\Request;
 use Notification;
 use Validator;
 
 class SuperUserController extends Controller
 {
+    use UploadImageTrait;
     public function createProduct(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -24,21 +27,23 @@ class SuperUserController extends Controller
             'amount' => 'required',
             'price' => 'required',
             'category' => 'required',
-            'image_path' => 'required'
+            'image_path' => 'image|mimes:jpeg,png,jpg',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        $user_id = auth()->user()->id;
-        $storeOwner = User::find($user_id)->store->first();
+        $user = auth()->user();
+        $storeOwner = User::find($user->id)->store->first();
         $store_id = $storeOwner->id;
+        $path = $this->uploadImage($request, 'products', $store_id);
+        //return response()->json($path);
         Product::create([
             'store_id' => $store_id,
             'name' => $request->name,
             'amount' => $request->amount,
             'price' => $request->price,
             'category' => $request->category,
-            'image_path' => $request->image_path,
+            'image_path' => $path,
         ]);
         return response()->json(['message' => 'product added successfully'], 200);
     }
@@ -64,12 +69,21 @@ class SuperUserController extends Controller
         if (!$product) {
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
+        if ($request->hasFile('image')) {
+            $destination = public_path('imgs/products/' . $product->store_id . '/' . $product->image_path);
+            if (File::exists($destination)) {
+                File::delete($destination);
+            }
+            $path = $this->uploadImage($request, 'products', $product->store_id);
+            $product->image_path = $path;
+            $product->save();
+        }
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'amount' => 'required',
             'price' => 'required',
             'category' => 'required',
-            'image_path' => 'required'
+            'image_path' => 'image|mimes:jpeg,png,jpg'
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
@@ -79,7 +93,7 @@ class SuperUserController extends Controller
             'amount' => $request->amount,
             'price' => $request->price,
             'category' => $request->category,
-            'image_path' => $request->image_path
+            'image_path' => $path
         ]);
         return response()->json(['message' => 'product updated successfully'], 200);
     }
@@ -128,7 +142,7 @@ class SuperUserController extends Controller
     public function acceptSending($id)
     {
         $order = Order::find($id); // Fetch the order
-        if (!$order || $order->status !='waiting') {
+        if (!$order || $order->status != 'waiting') {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
