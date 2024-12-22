@@ -14,6 +14,7 @@ use App\Notifications\AcceptSending;
 use App\Notifications\RejectReceiving;
 use App\Notifications\RejectSending;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File as FacadesFile;
 use Notification;
@@ -23,32 +24,46 @@ class SuperUserController extends Controller
 {
     use UploadImageTrait;
     public function createProduct(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'amount' => 'required',
-            'price' => 'required',
-            'category' => 'required',
-            'image_path' => 'image|mimes:jpeg,png,jpg',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-        $user = auth()->user();
-        $storeOwner = User::find($user->id)->store->first();
-        $store_id = $storeOwner->id;
-        $path = $this->uploadImage($request, 'products', $store_id);
-        //return response()->json($path);
-        Product::create([
-            'store_id' => $store_id,
-            'name' => $request->name,
-            'amount' => $request->amount,
-            'price' => $request->price,
-            'category' => $request->category,
-            'image_path' => $path,
-        ]);
-        return response()->json(['message' => 'product added successfully'], 200);
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required',
+        'amount' => 'required|numeric',
+        'price' => 'required|numeric',
+        'category' => 'required',
+        'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors()->toJson(), 400);
     }
+
+    $user = auth()->user();
+    if (!$user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    $storeOwner = $user->store->first(); // Ensure store relationship is valid
+    if (!$storeOwner) {
+        return response()->json(['error' => 'Store not found for this user'], 404);
+    }
+
+
+    $store_id = $storeOwner->id;
+    $product=Product::create([
+        'store_id' => $store_id,
+        'name' => $request->name,
+        'amount' => $request->amount,
+        'price' => $request->price,
+        'category' => $request->category,
+
+    ]);
+
+    $path = $this->uploadImage($request, 'products', $product->id);
+    $product->update(['image_path'=>$path]);
+    $product->save();
+    return response()->json(['message' => 'Product added successfully'], 200);
+}
+
 
 
     public function getAllProductInStore(Request $request)
@@ -72,11 +87,13 @@ class SuperUserController extends Controller
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
         if ($request->hasFile('image')) {
-            $destination = public_path('imgs/products/' . $product->store_id . '/' . $product->image_path);
-            if (File::exists($destination)) {
-                File::delete($destination);
+
+            $oldImagePath = $product->image_path;
+
+            if (Storage::disk('project')->exists($oldImagePath)) {
+                Storage::disk('project')->delete($oldImagePath);
             }
-            $path = $this->uploadImage($request, 'products', $product->store_id);
+            $path = $this->uploadImage($request, 'products', $product->id);
             $product->image_path = $path;
             $product->save();
         }
@@ -103,16 +120,22 @@ class SuperUserController extends Controller
     {
         $user_id = auth()->user()->id;
         $products = User::find($user_id)->store->products()->where('active', 1)->get();
-        if (!$products) {
+        if ($products->isEmpty()) {
             return response()->json(['data' => null, 'message' => 'products not found'], 400);
         }
         $product = $products->where('id', $product_id)->first();
         if (!$product) {
-            return response()->json(['data' => null, 'message' => 'products not found'], 400);
+            return response()->json(['data' => null, 'message' => 'product not found'], 400);
+        }
+        $imagePath = $product->image_path;
+        if (Storage::disk('project')->exists($imagePath)) {
+            Storage::disk('project')->delete($imagePath);
         }
         $product->delete();
-        return response()->json(['message' => 'product deleted succssefully'], 200);
+
+        return response()->json(['message' => 'Product deleted successfully'], 200);
     }
+
     public function acceptReceiving($id)
     {
         $order = Order::find($id);

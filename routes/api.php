@@ -45,7 +45,7 @@ Route::group([
 Route::group(['middleware' => [SuperUserMiddleware::class, 'api', 'auth', TowFactor::class]], function () {
     Route::post('createProduct', [SuperUserController::class, 'createProduct']);
     Route::get('getAllProductInStore', [SuperUserController::class, 'getAllProductInStore']);
-    Route::put('updateProductInStore/{id}', [SuperUserController::class, 'updateProductInStore']);
+    Route::post('updateProductInStore/{id}', [SuperUserController::class, 'updateProductInStore']);
     Route::delete('deleteProductInStore/{id}', [SuperUserController::class, 'deleteProductInStore']);
     Route::post('acceptReceiving/{id}', [SuperUserController::class, 'acceptReceiving']);
     Route::delete('rejectReceiving/{id}', [SuperUserController::class, 'rejectReceiving']);
@@ -61,7 +61,7 @@ Route::group(['middleware' => [SuperUserMiddleware::class, 'api', 'auth', TowFac
 Route::group([
     'middleware' => [TowFactor::class, UserMiddleWare::class, 'api', 'auth'],
 ], function ($router) {
-    Route::put('/updateImage', [UserController::class, 'updateImage']);
+    Route::post('/updateImage', [UserController::class, 'updateImage']);
     Route::post('/addAddress', [UserController::class, 'addAddress']);
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
     Route::get('showImage', [UserController::class, 'showPhoto']);

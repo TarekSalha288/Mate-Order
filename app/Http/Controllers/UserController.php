@@ -14,6 +14,8 @@ use App\Models\Address;
 use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+
+use Illuminate\Support\Facades\Storage;
 class UserController extends Controller
 {
     use UploadImageTrait;
@@ -32,7 +34,7 @@ class UserController extends Controller
         }
         if ($request->email != $user->email) {
             $user->generateCode();
-            Mail::to($user->email)->send(new TowFactorMail($user->code));
+            Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
         }
         $user->update([
             'firstName' => $request->firstName,
@@ -43,7 +45,6 @@ class UserController extends Controller
         ]);
         return response()->json(['message' => 'Info Updated Succseflly'], 200);
     }
-
     public function updatePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -67,28 +68,37 @@ class UserController extends Controller
     public function deleteImage()
     {
         $user = auth()->user();
-        if (request()->hasFile('image')) {
-            $destenation = 'public/imgs/' . $user->id . '/' . $user->image_path;
-            if (file_exists($destenation)) {
-                File::delete($destenation);
-            }
+        $oldImagePath = $user->image_path;
+        if (Storage::disk('project')->exists($oldImagePath)) {
+            Storage::disk('project')->delete($oldImagePath);
+            $user->update(['image_path'=>'null']);
+            $user->save();
+            return response()->json(['message'=>'Deleted Sucssfully'],200);
         }
+        return response()->json(['message'=>'Not Correct Path'],400);
     }
-    public function updateImage(Request $request)
-    {
-        // $user = Auth::user();
-        // if ($request->hasFile('image')) {
-        //     $destination = public_path('imgs/users/' . $user->id . '/' . $user->image_path);
-        //     if (File::exists($destination)) {
-        //         File::delete($destination);
-        //     }
-        //     $path = $this->uploadImage($request, 'users', $user->id);
-        //     $user->image_path = $path;
-        //     $user->save();
-        //     return response()->json(['message' => 'Image Updated Successfully'], 200);
-        // }
-        return response()->json(['message' => $request->hasFile('image')], 400);
+
+
+public function updateImage(Request $request)
+{
+    $user = Auth::user();
+
+    if ($request->hasFile('image')) {
+
+        $oldImagePath = $user->image_path;
+
+        if (Storage::disk('project')->exists($oldImagePath)) {
+            Storage::disk('project')->delete($oldImagePath);
+        }
+        $path = $this->uploadImage($request, 'users', $user->id);
+        $user->image_path = $path;
+        $user->save();
+        return response()->json(['message' => $user->image_path], 200);
     }
+
+    return response()->json(['message' => 'No File'], 400);
+}
+
     public function addAddress()
     {
         $validator = Validator::make(request()->all(), [

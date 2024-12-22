@@ -8,10 +8,20 @@ use Illuminate\Support\Facades\Validator;
 class StoreController extends Controller
 {
 public function show(){
-    $stores=Store::all();
+    $stores=Store::paginate(10);
     if($stores->isEmpty())
     return response()->json(['message'=>'No Stores To Show'],200);
-    return response()->json($stores,200);
+    return response()->json([
+        'data' => $stores,
+        'pagination' => [
+            'current_page' => $stores->currentPage(),
+            'last_page' => $stores->lastPage(),
+            'total' => $stores->total(),
+            'per_page' => $stores->perPage(),
+            'next_page_url' => $stores->nextPageUrl(),
+            'prev_page_url' => $stores->previousPageUrl(),
+        ],
+    ], 200);
 }
 public function edit($id){
     $store=Store::find($id);

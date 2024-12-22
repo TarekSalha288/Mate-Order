@@ -44,7 +44,13 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
-
+        'project' => [
+            'driver' => 'local', // Use the local driver
+            'root' => storage_path('app/project'), // Path for storing files
+            'url' => env('APP_URL') . '/storage/project', // Public URL
+            'visibility' => 'public', // Make files publicly accessible
+            'throw' => false,
+        ],
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
