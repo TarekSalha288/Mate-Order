@@ -115,9 +115,23 @@ class ProductController extends Controller
         }
         $query = request()->input('name');
         $products = Product::where('name', 'LIKE', "%{$query}%")->where('active', 1)->get();
+        $allProducts=[];
+        foreach($products as $product){
+            $owner=$product->store;
+            $fav = DB::table('favorite')
+            ->where('user_id', auth()->user()->id)
+            ->where('product_id', $product->id)
+            ->exists();
+            $product['owner'] = $owner->store_name;
+            $product['fav'] = $fav;
+            unset($product['store']);
+            $allProducts[] = [
+                'product' => $product,
+            ];
+        }
         if ($products->isEmpty())
             return response()->json(['message' => 'No Result'], 400);
-        return response()->json($products, 200);
+        return response()->json(['data'=>$allProducts], 200);
     }
 
 
