@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 class StoreController extends Controller
 {
@@ -23,15 +25,42 @@ public function show(){
         ],
     ], 200);
 }
-public function edit($id){
-    $store=Store::find($id);
-    if($store){
-    $products=$store->products()->where('active',1)->paginate(6);
-    if($products->isEmpty())
-    return response()->json(['message'=>'No Products For This Store To Show'],400);
-    return response()->json($products,200);
-}
-return response()->json(['message'=>'Store Not Found'],400);
+public function edit($id)
+{
+    $store = Store::find($id);
+    if ($store) {
+        $products = Product::where('store_id', $id)->where('active', 1)->paginate(4);
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No Products For This Store To Show']);
+        }
+        $allProducts = [];
+        foreach ($products as $product) {
+            $fav = DB::table('favorite')
+                ->where('user_id', auth()->user()->id)
+                ->where('product_id', $product->id)
+                ->exists();
+
+            $owner = Store::where('id', $product->store_id)->first();
+            $product->toArray();
+            $product['owner'] = $owner->store_name;
+            $product['fav'] = $fav;
+            $allProducts[] = [
+                'product' => $product,
+            ];
+        }
+        return response()->json([
+            'data' => $allProducts,
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'total' => $products->total(),
+                'per_page' => $products->perPage(),
+                'next_page_url' => $products->nextPageUrl(),
+                'prev_page_url' => $products->previousPageUrl(),
+            ],
+        ], 200);
+    }
+    return response()->json(['message' => 'Store Not Found'], 400);
 }
 
 public function searchStore(){
