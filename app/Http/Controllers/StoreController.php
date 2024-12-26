@@ -43,9 +43,8 @@ public function searchStore(){
     }
     $query = request()->input('name');
     $stores = Store::where('store_name', 'LIKE', "%{$query}%")->get();
-    //$stores->toArray();
     if($stores->isEmpty())
     return response()->json(['message'=>'No Result'],400);
-    return response()->json($stores,200);
+    return response()->json(['data'=>$stores],200);
 }
 }
