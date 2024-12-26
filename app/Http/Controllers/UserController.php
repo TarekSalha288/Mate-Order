@@ -127,11 +127,22 @@ public function updateImage(Request $request)
     {
         $user = auth()->user();
         if ($user) {
-            if ($user->image_path != 'null')
-                return response()->json([auth()->user()->image_path], 200);
-            return response()->json(['message' => 'You Don\'t Have Photo Yet'], 200);
+            if ($user->image_path && $user->image_path !== 'null') {
+                $imagePath = storage_path('app/project/' . $user->image_path);
+
+                if (file_exists($imagePath)) {
+                    return response()->file($imagePath);
+                }
+
+                return response()->json(['message' => 'Image file does not exist.'], 404);
+            }
+
+            return response()->json(['message' => 'You don\'t have a photo yet.'], 200);
         }
+
+        return response()->json(['message' => 'User not authenticated.'], 401);
     }
+
     public function notifications()
     {
         $notifications = User::find(auth()->user()->id)->notifications;
