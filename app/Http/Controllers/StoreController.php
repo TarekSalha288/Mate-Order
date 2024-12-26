@@ -26,7 +26,7 @@ public function show(){
 public function edit($id){
     $store=Store::find($id);
     if($store){
-    $products=$store->products()->where('active',1)->paginate(5);
+    $products=$store->products()->where('active',1)->paginate(6);
     if($products->isEmpty())
     return response()->json(['message'=>'No Products For This Store To Show'],400);
     return response()->json($products,200);

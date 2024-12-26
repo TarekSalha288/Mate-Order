@@ -57,13 +57,15 @@ class UserController extends Controller
         }
         if (Hash::check($request->current_password, Auth::user()->password)) {
             if ($request->password == $request->confirmation_password) {
+                $password=Hash::make($request->password);
                 User::where('id', auth()->user()->id)->update([
-                    'password' => $request->password,
+                    'password' => $password,
                 ]);
-                return response()->json(true);
+                return response()->json(['message'=>'Password Changed Sucssfully']);
             }
+            return response()->json(['message'=>'Password And Confirmation_Password Not The Same'],400);
         }
-        return response()->json(false);
+        return response()->json(['message'=>'Old Password Not Correct'],400);
     }
     public function deleteImage()
     {
@@ -133,10 +135,8 @@ public function updateImage(Request $request)
                 if (file_exists($imagePath)) {
                     return response()->file($imagePath);
                 }
-
                 return response()->json(['message' => 'Image file does not exist.'], 404);
             }
-
             return response()->json(['message' => 'You don\'t have a photo yet.'], 200);
         }
 
