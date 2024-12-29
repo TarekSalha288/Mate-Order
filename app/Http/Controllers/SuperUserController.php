@@ -46,8 +46,6 @@ class SuperUserController extends Controller
         if (!$storeOwner) {
             return response()->json(['error' => 'Store not found for this user'], 404);
         }
-
-
         $store_id = $storeOwner->id;
         $product = Product::create([
             'store_id' => $store_id,

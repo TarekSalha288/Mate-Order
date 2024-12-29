@@ -138,7 +138,7 @@ class UserController extends Controller
         $user = auth()->user();
         if ($user) {
             if ($user->image_path && $user->image_path !== 'null') {
-                $imagePath = storage_path('app/project/' . $user->image_path);
+                $imagePath = public_path('storage/project/' . $user->image_path);
 
                 if (file_exists($imagePath)) {
                     return response()->file($imagePath);
