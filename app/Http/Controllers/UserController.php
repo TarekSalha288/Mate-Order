@@ -134,6 +134,14 @@ class UserController extends Controller
         }
         return response()->json($allAdreeses, 200);
     }
+    public function deleteAddress($id){
+$address=User::find(auth()->user()->id)->addresses()->where('id',$id)->first();
+if($address){
+    Address::destroy($id);
+    return response()->json(['message'=>'Address Deleted Sucssfully'],200);
+}
+return response()->json(['message'=>'Address Not Found'],400);
+    }
     public function showPhoto()
     {
         $user = auth()->user();

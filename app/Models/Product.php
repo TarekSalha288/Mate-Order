@@ -19,4 +19,7 @@ class Product extends Model
     public function users(): BelongsToMany{
         return $this->belongsToMany(User::class,'favorite','user_id');
     }
+    public function usersCart(): BelongsToMany{
+        return $this->belongsToMany(User::class,'carts');
+    }
 }

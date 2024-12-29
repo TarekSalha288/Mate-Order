@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
 use App\Http\Middleware\TowFactor;
@@ -64,6 +65,7 @@ Route::group([
     Route::post('/updateImage', [UserController::class, 'updateImage']);
     Route::post('/addAddress', [UserController::class, 'addAddress']);
     Route::delete('/deleteImage', [UserController::class, 'deleteImage']);
+    Route::delete('/deleteAddress/{id}', [UserController::class, 'deleteAddress']);
     Route::get('showImage', [UserController::class, 'showPhoto']);
     Route::get('showAddresses', [UserController::class, 'showAddresses']);
     Route::get('notificationsUser', [UserController::class, 'notifications']);
@@ -85,6 +87,10 @@ Route::group([
     Route::get('getAllWaitingOrdersInCart', [OrderController::class, 'getAllWaitingOrdersInCart']);
     Route::get('getAllInWayOrder', [OrderController::class, 'getAllInWayOrder']);
     Route::get('getAllReceivingOrder', [OrderController::class, 'getAllReceivingOrder']);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    Route::post('create/{id}',[CartController::class,'create']);
+    Route::get('show',[CartController::class,'cart']);
+    Route::delete('delete/{id}',[CartController::class,'delete']);
 });
 Route::group([
     'middleware' => [TowFactor::class, AdminMiddleWare::class, 'api', 'auth'],
