@@ -107,6 +107,7 @@ class UserController extends Controller
             'title' => 'required',
             'latitude' => 'required',
             'longitude' => 'required',
+
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
