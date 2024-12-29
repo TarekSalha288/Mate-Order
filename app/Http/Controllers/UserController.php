@@ -34,7 +34,7 @@ class UserController extends Controller
         }
         if ($request->email != $user->email) {
             $user->generateCode();
-            Mail::to($user->email)->send(new TowFactorMail($user->code,$user->firstName));
+            Mail::to($user->email)->send(new TowFactorMail($user->code, $user->firstName));
         }
         $user->update([
             'firstName' => $request->firstName,
@@ -57,15 +57,15 @@ class UserController extends Controller
         }
         if (Hash::check($request->current_password, Auth::user()->password)) {
             if ($request->password == $request->confirmation_password) {
-                $password=Hash::make($request->password);
+                $password = Hash::make($request->password);
                 User::where('id', auth()->user()->id)->update([
                     'password' => $password,
                 ]);
-                return response()->json(['message'=>'Password Changed Sucssfully']);
+                return response()->json(['message' => 'Password Changed Sucssfully']);
             }
-            return response()->json(['message'=>'Password And Confirmation_Password Not The Same'],400);
+            return response()->json(['message' => 'Password And Confirmation_Password Not The Same'], 400);
         }
-        return response()->json(['message'=>'Old Password Not Correct'],400);
+        return response()->json(['message' => 'Old Password Not Correct'], 400);
     }
     public function deleteImage()
     {
@@ -73,47 +73,49 @@ class UserController extends Controller
         $oldImagePath = $user->image_path;
         if (Storage::disk('project')->exists($oldImagePath)) {
             Storage::disk('project')->delete($oldImagePath);
-            $user->update(['image_path'=>'null']);
+            $user->update(['image_path' => 'null']);
             $user->save();
-            return response()->json(['message'=>'Deleted Sucssfully'],200);
+            return response()->json(['message' => 'Deleted Sucssfully'], 200);
         }
-        return response()->json(['message'=>'Not Correct Path'],400);
+        return response()->json(['message' => 'Not Correct Path'], 400);
     }
 
 
-public function updateImage(Request $request)
-{
-    $user = Auth::user();
+    public function updateImage(Request $request)
+    {
+        $user = Auth::user();
 
-    if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
 
-        $oldImagePath = $user->image_path;
+            $oldImagePath = $user->image_path;
 
-        if (Storage::disk('project')->exists($oldImagePath)) {
-            Storage::disk('project')->delete($oldImagePath);
+            if (Storage::disk('project')->exists($oldImagePath)) {
+                Storage::disk('project')->delete($oldImagePath);
+            }
+            $path = $this->uploadImage($request, 'users', $user->id);
+            $user->image_path = $path;
+            $user->save();
+            return response()->json(['message' => $user->image_path], 200);
         }
-        $path = $this->uploadImage($request, 'users', $user->id);
-        $user->image_path = $path;
-        $user->save();
-        return response()->json(['message' => $user->image_path], 200);
-    }
 
-    return response()->json(['message' => 'No File'], 400);
-}
+        return response()->json(['message' => 'No File'], 400);
+    }
 
     public function addAddress()
     {
         $validator = Validator::make(request()->all(), [
-            'tall' => 'required',
-            'width' => 'required',
+            'title' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
         Address::create([
-            'tall' => request()->input('tall'),
-            'width' => request()->input('width'),
-            'note' => request()->input('note'),
+            'title' => request()->input('title'),
+            'latitude' => request()->input('latitude'),
+            'longitude' => request()->input('longitude'),
+            'description' => request()->input('description'),
             'user_id' => auth()->user()->id,
         ]);
         return response()->json(['message' => 'Added Address Sucssfully'], 201);
@@ -123,7 +125,13 @@ public function updateImage(Request $request)
         $addresses = User::find(auth()->user()->id)->addreses;
         if ($addresses->isEmpty())
             return response()->json(['message' => 'You Don\'t Have Addresses Yet'], 400);
-        return response()->json($addresses, 200);
+        $allAdreeses = [];
+        foreach ($addresses as $address) {
+            $allAdreeses[] = [
+                'address' => $address
+            ];
+        }
+        return response()->json($allAdreeses, 200);
     }
     public function showPhoto()
     {

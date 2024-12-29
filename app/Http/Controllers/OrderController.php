@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Notifications\OrderSendingToSuperUser;
 use DB;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {

@@ -13,56 +13,56 @@ use App\Notifications\AcceptReceiving;
 use App\Notifications\AcceptSending;
 use App\Notifications\RejectReceiving;
 use App\Notifications\RejectSending;
-
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File as FacadesFile;
 use Notification;
-use Validator;
+
 
 class SuperUserController extends Controller
 {
     use UploadImageTrait;
     public function createProduct(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'name' => 'required',
-        'amount' => 'required|numeric',
-        'price' => 'required|numeric',
-        'category' => 'required',
-        'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'amount' => 'required|numeric',
+            'price' => 'required|numeric',
+            'category' => 'required',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json($validator->errors()->toJson(), 400);
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $storeOwner = $user->store->first(); // Ensure store relationship is valid
+        if (!$storeOwner) {
+            return response()->json(['error' => 'Store not found for this user'], 404);
+        }
+
+
+        $store_id = $storeOwner->id;
+        $product = Product::create([
+            'store_id' => $store_id,
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'price' => $request->price,
+            'category' => $request->category,
+
+        ]);
+
+        $path = $this->uploadImage($request, 'products', $product->id);
+        $product->update(['image_path' => $path]);
+        $product->save();
+        return response()->json(['message' => 'Product added successfully'], 200);
     }
-
-    $user = auth()->user();
-    if (!$user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
-    }
-
-    $storeOwner = $user->store->first(); // Ensure store relationship is valid
-    if (!$storeOwner) {
-        return response()->json(['error' => 'Store not found for this user'], 404);
-    }
-
-
-    $store_id = $storeOwner->id;
-    $product=Product::create([
-        'store_id' => $store_id,
-        'name' => $request->name,
-        'amount' => $request->amount,
-        'price' => $request->price,
-        'category' => $request->category,
-
-    ]);
-
-    $path = $this->uploadImage($request, 'products', $product->id);
-    $product->update(['image_path'=>$path]);
-    $product->save();
-    return response()->json(['message' => 'Product added successfully'], 200);
-}
 
 
 
@@ -335,9 +335,9 @@ class SuperUserController extends Controller
     }
     public function archive()
     {
-        $products = User::find(auth()->user()->id)->store->products()->where('active',0)->paginate(10);
+        $products = User::find(auth()->user()->id)->store->products()->where('active', 0)->paginate(10);
         if ($products->isEmpty())
-           return response()->json(['message' => 'No Items To Show']);
+            return response()->json(['message' => 'No Items To Show']);
         return response()->json([
             'data' => $products,
             'pagination' => [
