@@ -26,7 +26,7 @@ class UserController extends Controller
             'firstName' => 'required',
             'lastName' => 'required',
             'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'phone' => 'required|size:12|starts_with:+,963|unique:users,phone,' . Auth::id(),
+            'phone' => 'required|size:13|starts_with:+,963|unique:users,phone,' . Auth::id(),
             'image_path' => 'image|mimes:jpeg,png,jpg',
         ]);
         if ($validator->fails()) {
@@ -155,7 +155,7 @@ class UserController extends Controller
                 }
                 return response()->json(['message' => 'Image file does not exist.'], 404);
             }
-            return response()->json(['message' => 'You don\'t have a photo yet.'], 200);
+            return response()->json([null], 200);
         }
 
         return response()->json(['message' => 'User not authenticated.'], 401);

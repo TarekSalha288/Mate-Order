@@ -40,10 +40,10 @@ class OrderController extends Controller
         $product->update([
             'amount' => $product->amount - $request->total_amount
         ]);
-        $cart = Cart::where('product_id', $product_id)->first();
-        if ($cart) {
-            $cart->delete();
-        }
+        // $cart = Cart::where('product_id', $product_id)->first();
+        // if ($cart) {
+        //     $cart->delete();
+        // }
         $super_user->user->notify(new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
         return response()->json(['message' => 'order added successfully']);
         // if we order all amount we must delete this product after accept the order in superUser

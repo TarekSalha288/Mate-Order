@@ -42,7 +42,7 @@ class SuperUserController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $storeOwner = $user->store->first(); // Ensure store relationship is valid
+        $storeOwner = $user->store; // Ensure store relationship is valid
         if (!$storeOwner) {
             return response()->json(['error' => 'Store not found for this user'], 404);
         }
