@@ -14,10 +14,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreignId('product_id')->references('id')->on('products')->cascadeOnDelete();
+            $table->string('status')->default('waiting_accept');
             $table->integer('total_price');
             $table->integer('total_amount');
-             $table->string('status')->default('waiting');
             $table->dateTime('send_date')->nullable();
             $table->dateTime('recive_date')->nullable();
             $table->timestamps();

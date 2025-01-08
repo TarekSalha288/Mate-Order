@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('product_id')->references('id')->on('products')->cascadeOnDelete();
+
+            $table->foreignId('store_id')->references('id')->on('stores')->cascadeOnDelete();
+            $table->integer('total_amount')->default(1);
+            $table->string('status')->default('waiting');
             $table->timestamps();
         });
     }

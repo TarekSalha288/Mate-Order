@@ -19,7 +19,11 @@ class Product extends Model
     public function users(): BelongsToMany{
         return $this->belongsToMany(User::class,'favorite','user_id');
     }
-    public function usersCart(): BelongsToMany{
-        return $this->belongsToMany(User::class,'carts');
+
+    public function cart()
+    {
+        return $this->belongsToMany(User::class, 'cart')
+                    ->withPivot('total_amount', 'total_price', 'status')
+                    ->withTimestamps();
     }
 }

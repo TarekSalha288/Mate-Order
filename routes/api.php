@@ -81,8 +81,8 @@ Route::group([
     Route::get('searchStore', [StoreController::class, 'searchStore']);
     Route::get('storeProducts/{id}', [StoreController::class, 'edit']);
     ////////////////////////////////////////////////////////////////////////////////////
-    Route::post('addOrder/{Product_id}/{adress_id}', [OrderController::class, 'addOrder']);
-    Route::put('updateOrder/{order_id}/{adress_id}', [OrderController::class, 'updateOrder']);
+    Route::post('addOrder/{adress_id}', [OrderController::class, 'addOrder']);
+    Route::put('updateOrder/{order_id}/{product_id}', [OrderController::class, 'updateOrder']);
     Route::delete('deleteOrder/{order_id}', [OrderController::class, 'deleteOrder']);
     Route::get('getAllWaitingOrdersInCart', [OrderController::class, 'getAllWaitingOrdersInCart']);
     Route::get('getAllInWayOrder', [OrderController::class, 'getAllInWayOrder']);
@@ -91,6 +91,7 @@ Route::group([
     Route::post('create/{id}',[CartController::class,'create']);
     Route::get('show',[CartController::class,'cart']);
     Route::delete('delete/{id}',[CartController::class,'delete']);
+    Route::put('update/{id}',[CartController::class,'update']);
 });
 Route::group([
     'middleware' => [TowFactor::class, AdminMiddleWare::class, 'api', 'auth'],

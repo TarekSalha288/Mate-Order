@@ -45,7 +45,6 @@ class AcceptSending extends Notification implements ShouldQueue
     {
         $fcmToken = $notifiable->routeNotificationForFcm(); // Ensure this method exists in your User model
         $fcmService = new FCMService();
-
         // Send the FCM notification
         $response = $fcmService->sendNotification(
             $fcmToken,

@@ -13,42 +13,53 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    public function addOrder(Request $request, $product_id, $adress_id)
+    public function addOrder( $address_id)
     {
-        // in flutter its important to put the add adress puttom to add adress id if they dont have adress id to pass it in param
+        $address=auth()->user()->addreses->where('id',$address_id);
+
+        if($address->isEmpty())
+        return response()->json(['message'=>'Not Your Address']);
+        $total_price = 0;
         $user = auth()->user();
-        $product = Product::find($product_id);
-        $super_user = $product->store;
-        $validator = Validator::make($request->all(), [
-            'total_amount' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+        $cart = $user->cart()->where('status', 'waiting')->get();
+        if ($cart->isEmpty()) {
+            return response()->json(['message' => 'You don\'t have anything in the cart to add to an order'], 400);
         }
-        $total_price = $product->price * $request->total_amount;
-        if ($request->total_amount > $product->amount) {
-            return response()->json(['message' => "we dont have enouth amount the total amount we have just $product->amount"]);
+        $admin = User::where('status_role', 'admin')->first();
+        foreach ($cart as $c) {
+            $product=$c->product;
+            if ($c->total_amount > $product->amount) {
+                return response()->json([
+                    'message' => "We don't have enough of {$product->name}. The total available amount is just {$product->amount}."
+                ], 400);
+            }
+            $product->update([
+                'amount' => $product->amount - $c->total_amount,
+            ]);
+            $total_price += $c->total_price;
         }
         $order = Order::create([
-            'total_amount' => $request->total_amount,
+            'total_amount' => $cart->count(),
             'total_price' => $total_price,
             'user_id' => $user->id,
-            'product_id' => $product_id,
-            'address_id' => $adress_id,
-            'store_id' => $product->store_id
+            'status' => 'waiting_accept',
+            'address_id' => $address_id,
         ]);
-        $product->update([
-            'amount' => $product->amount - $request->total_amount
-        ]);
-        // $cart = Cart::where('product_id', $product_id)->first();
-        // if ($cart) {
-        //     $cart->delete();
-        // }
-        $super_user->user->notify(new OrderSendingToSuperUser($user->firstName, $product_id, $order->id));
-        return response()->json(['message' => 'order added successfully']);
-        // if we order all amount we must delete this product after accept the order in superUser
-        // and if its disaccept we must return the amount to product
+            $admin->notify(new OrderSendingToSuperUser($user->firstName, $c->product_id, $order->id));
+        foreach($cart as $c){
+
+            $c->update([
+                'order_id' => $order->id
+            ]);
+            $c->update([
+                'status' => 'waiting_accept'
+            ]);
     }
+    $admin->notify(new OrderSendingToSuperUser($user->firstName,  $order->id));
+    return response()->json(['message' => 'order added successfully']);
+
+}
+
     public function getAllWaitingOrdersInCart()
     {
         $user_id = auth()->user()->id;
@@ -79,57 +90,45 @@ class OrderController extends Controller
         }
         return response()->json(['data' => null, 'message' => 'you dont have any accepted order'], 400);
     }
-    public function updateOrder(Request $request, $order_id, $adress_id)
+    public function updateOrder(Request $request, $order_id, $product_id)
     {
-        $order = Order::find($order_id);
-        if (!$order) {
-            return response()->json(['message' => 'order accepted you can,t updated the order']);
-        }// if the the order accepted and stell in the cart
-        $old_amount = $order->total_amount;
-        $product = Product::find($order->product_id);
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make(request()->all(), [
             'total_amount' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        $new_amount = $request->total_amount;
-        $total_price = $product->price * $new_amount;
-        $new_total_amount = 0;
-        if ($new_amount > $old_amount) {
-            $new_total_amount = $new_amount - $old_amount;
-            if ($new_total_amount > $product->amount) {
-                return response()->json(['message' => "we dont have enouth amount the total amount we have just $product->amount"]);
-            } else {
+        $order=auth()->user()->orders()->where('status','waiting_accept')->where('id',$order_id)->first();
+        if(!$order)
+        return response()->json(['message'=>'Order Not Found'],400);
+    $cart=$order->cart()->where('status','waiting_accept')->where('product_id',$product_id)->first();
 
-                $order->update([
-                    'total_amount' => $new_amount,
-                    'total_price' => $total_price,
-                    'address_id' => $adress_id
-                ]);
-                $product->update([
-                    'amount' => $product->amount - $new_total_amount
-                ]);
-            }
-        } elseif ($new_amount < $old_amount) {
-            $new_total_amount = $old_amount - $new_amount;
-            $order->update([
-                'total_amount' => $new_amount,
-                'total_price' => $total_price,
-                'address_id' => $adress_id
-            ]);
-            $product->update([
-                'amount' => $product->amount + $new_total_amount
-            ]);
-        } else {
-            $order->update([
-                'total_amount' => $new_amount,
-                'total_price' => $total_price,
-                'address_id' => $adress_id
-            ]);
-        }
-        return response()->json(['meassage' => 'order updated successfully']);
+    if(!$cart)
+    return response()->json(['message'=>'Product Not Found'],400);
+    $product=$cart->product;
+    $price=$product->price;
+    $total_price=$price * $request->total_amount;
+        if(($request->total_amount) <= $product->amount ){
+      $cart->update([
+        'total_amount'=>$request->total_amount,
+        'total_price'=>$total_price,
+      ]);
+
+    $product->update([
+        'amount' => $product->amount - $request->total_amount ,
+    ]);
+    $newprice=0;
+$carts=$order->cart;
+    foreach($carts as $cart ){
+       $newprice+= $cart->total_price;
     }
+    $order->update(['total_price'=>$newprice]);
+      return response()->json(['message'=>'Product Updated Sucssfully'],200);
+    }
+    return response()->json(['message'=>'Amount You Needed Huge'],400);
+    }
+
+
     public function deleteOrder($order_id)
     {
         $order = Order::find($order_id);
