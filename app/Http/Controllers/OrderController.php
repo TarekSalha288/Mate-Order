@@ -85,7 +85,7 @@ class OrderController extends Controller
       ]);
 
     $product->update([
-        'amount' => $product->amount - $request->total_amount ,
+        'amount' => $product->amount + $request->total_amount ,
     ]);
     $newprice=0;
 $carts=$order->cart;
@@ -156,5 +156,4 @@ return response()->json(['message'=>"Deleted $product->name From Order Id $order
         }
         return response()->json(['data'=>$all]);
     }
-
 }
