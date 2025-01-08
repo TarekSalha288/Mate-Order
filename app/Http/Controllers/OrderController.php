@@ -148,14 +148,13 @@ return response()->json(['message'=>"Deleted $product->name From Order Id $order
         $all=[];
         foreach($carts as $cart){
             $all[] = [
-                'productInCart' => array_merge(
-                    $cart->toArray(),
-                    ['store' => $cart->store->store_name,
-                    'productInCart'=>$cart->product]
-                ),
+                'productInCart'=>$cart->product,
+                    'store' => $cart->store->store_name,
+                    'total_amount'=>$cart->total_amount,
+                    'total_price'=>$cart->total_price,
             ];
         }
-        return response()->json($all);
+        return response()->json(['data'=>$all]);
     }
 
 }
