@@ -12,7 +12,7 @@ class CartController extends Controller
     public function create($id)
     {
  $product = Product::find($id);
-$cart = User::find(auth()->user()->id)->cart()->where('product_id', $id)->first();
+$cart = User::find(auth()->user()->id)->cart()->where('product_id', $id)->where('status','waiting')->first();
 if (!$product)
     return response()->json(['message' => 'Product Not Found'], 400);
 if ($cart)

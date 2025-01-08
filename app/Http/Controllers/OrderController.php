@@ -18,7 +18,7 @@ class OrderController extends Controller
         $address=auth()->user()->addreses->where('id',$address_id);
 
         if($address->isEmpty())
-        return response()->json(['message'=>'Not Your Address']);
+        return response()->json(['message'=>'Not Your Address'],400);
         $total_price = 0;
         $user = auth()->user();
         $cart = $user->cart()->where('status', 'waiting')->get();
@@ -59,37 +59,7 @@ class OrderController extends Controller
     return response()->json(['message' => 'order added successfully']);
 
 }
-
-    public function getAllWaitingOrdersInCart()
-    {
-        $user_id = auth()->user()->id;
-        $orders = User::find($user_id)->orders()->where('status', 'waiting')->get();
-        // I must use scope later and tarek in this case we can use just where
-        if (!$orders->isEmpty()) {
-            return response()->json(['data' => $orders, 'message' => 'this is all bending order'], 200);
-        }
-        return response()->json(['data' => null, 'message' => 'you dont have any order'], 400);
-    }// update in name in postman for not conflect
-    public function getAllInWayOrder()
-    {
-        $user_id = auth()->user()->id;
-        $orders = User::find($user_id)->orders()->where('status', 'sending')->get();
-        // I must use scope later and tarek in this case we can use just where
-        if (!$orders->isEmpty()) {
-            return response()->json(['data' => $orders, 'message' => 'this is all in way order'], 200);
-        }
-        return response()->json(['data' => null, 'message' => 'you dont have any in way order'], 400);
-    }
-    public function getAllReceivingOrder()
-    {
-        $user_id = auth()->user()->id;
-        $orders = User::find($user_id)->orders()->where('status', 'receiving')->get();
-        // I must use scope later and tarek in this case we can use just where
-        if (!$orders->isEmpty()) {
-            return response()->json(['data' => $orders, 'message' => 'this is all accepted order'], 200);
-        }
-        return response()->json(['data' => null, 'message' => 'you dont have any accepted order'], 400);
-    }
+////////////////////////////////////////////////////////////////////////////////
     public function updateOrder(Request $request, $order_id, $product_id)
     {
         $validator = Validator::make(request()->all(), [
@@ -128,20 +98,64 @@ $carts=$order->cart;
     return response()->json(['message'=>'Amount You Needed Huge'],400);
     }
 
+public function deleteFromOrder($order_id,$product_id){
+$order=auth()->user()->orders()->where('id',$order_id)->first();
+if(!$order)
+return response()->json(['message'=>'Order Id Not Correct'],400);
 
+$cart=$order->cart->where('product_id',$product_id)->where('status','waiting_accept')->first();
+if(!$cart)
+return response()->json(['message'=>'Product Not Found'],400);
+$product=$cart->product;
+$product->update(['amount'=>$product->amount + $cart->total_amount]);
+$order->update(['total_amount'=>$order->total_amount - 1,
+'total_price'=>$order->total_price - $cart->total_price]);
+auth()->user()->cart()->where('status','waiting_accept')->where('product_id',$product_id)->delete();
+if($order->total_amount == 0)
+    $order->delete();
+
+return response()->json(['message'=>"Deleted $product->name From Order Id $order_id "]);
+}
+///////////////////////////////////////////
     public function deleteOrder($order_id)
     {
-        $order = Order::find($order_id);
-        $amount = $order->total_amount;
-        $product = Product::find($order->product_id);
-        $deleteProduct = $order->find($order_id)->delete();
+        $order=auth()->user()->orders()->where('id',$order_id)->where('status','waiting_accept')->first();
+        if(!$order)
+        return response()->json(['message'=>'Order Id Not Correct'],400);
+        $cart=$order->cart;
+        foreach($cart as $c){
+        $product=$c->product;
         $product->update([
-            'amount' => $product->amount + $amount
+            'amount' => $product->amount + $c->total_amount
         ]);
-        if ($deleteProduct) {
-            return response()->json(['message' => 'order deleted succufully']);
-        } else {
-            return response()->json(['message' => 'order deleted failed']);
-        }
+     $product->save();
     }
+      $order->delete();
+      return response()->json(['message' => "Order $order_id deleted succufully"]);
+    }
+    public function orders()
+    {
+     $orders=auth()->user()->orders()->orderBy('status','desc')->get();
+     if($orders->isEmpty())
+     return response()->json(['message'=>'No Orders Yet'],400);
+     return response()->json($orders);
+    }
+    public function edit($order_id){
+        $orders=auth()->user()->orders()->where('id',$order_id)->first();
+        if(!$orders)
+        return response()->json(['message'=>'Order Not Correct'],400);
+        $carts=$orders->cart;
+        $all=[];
+        foreach($carts as $cart){
+            $all[] = [
+                'productInCart' => array_merge(
+                    $cart->toArray(),
+                    ['store' => $cart->store->store_name,
+                    'productInCart'=>$cart->product]
+                ),
+            ];
+        }
+        return response()->json($all);
+    }
+
 }

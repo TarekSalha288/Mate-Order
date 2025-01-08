@@ -15,6 +15,9 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
 use App\Http\Middleware\TowFactor;
+use Illuminate\Support\Facades\Log;
+
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -48,15 +51,8 @@ Route::group(['middleware' => [SuperUserMiddleware::class, 'api', 'auth', TowFac
     Route::get('getAllProductInStore', [SuperUserController::class, 'getAllProductInStore']);
     Route::post('updateProductInStore/{id}', [SuperUserController::class, 'updateProductInStore']);
     Route::delete('deleteProductInStore/{id}', [SuperUserController::class, 'deleteProductInStore']);
-    Route::post('acceptReceiving/{id}', [SuperUserController::class, 'acceptReceiving']);
-    Route::delete('rejectReceiving/{id}', [SuperUserController::class, 'rejectReceiving']);
-    Route::post('acceptSending/{id}', [SuperUserController::class, 'acceptSending']);
-    Route::delete('rejectSending/{id}', [SuperUserController::class, 'rejectSending']);
-    Route::get('waiting', [SuperUserController::class, 'waitingOrders']);
-    Route::get('sending', [SuperUserController::class, 'sendingOrders']);
-    Route::get('receiving', [SuperUserController::class, 'receivingOrders']);
     Route::get('archive', [SuperUserController::class, 'archive']);
-    Route::get('notifications', [SuperUserController::class, 'notifications']);
+
     Route::put('refreshData', [SuperUserController::class, 'refreshData']);
 });
 Route::group([
@@ -83,10 +79,10 @@ Route::group([
     ////////////////////////////////////////////////////////////////////////////////////
     Route::post('addOrder/{adress_id}', [OrderController::class, 'addOrder']);
     Route::put('updateOrder/{order_id}/{product_id}', [OrderController::class, 'updateOrder']);
+    Route::delete('deleteFromOrder/{order_id}/{product_id}', [OrderController::class, 'deleteFromOrder']);
     Route::delete('deleteOrder/{order_id}', [OrderController::class, 'deleteOrder']);
-    Route::get('getAllWaitingOrdersInCart', [OrderController::class, 'getAllWaitingOrdersInCart']);
-    Route::get('getAllInWayOrder', [OrderController::class, 'getAllInWayOrder']);
-    Route::get('getAllReceivingOrder', [OrderController::class, 'getAllReceivingOrder']);
+    Route::get('userOrders',[OrderController::class,'orders']);
+    Route::get('editOrder/{id}',[OrderController::class,'edit']);
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     Route::post('create/{id}',[CartController::class,'create']);
     Route::get('show',[CartController::class,'cart']);
@@ -103,4 +99,22 @@ Route::group([
     Route::delete('deleteStore/{id}', [AdminController::class, 'deleteStore']);
     Route::get('allStores', [AdminController::class, 'stores']);
     Route::get('searchStoreInAdmin', [AdminController::class, 'searchStoreInAdmin']);
+    ///////////////////////////////////////////////////////////////////////////
+    Route::post('acceptReceiving/{id}', [AdminController::class, 'acceptReceiving']);
+    Route::delete('rejectReceiving/{id}', [AdminController::class, 'rejectReceiving']);
+    Route::post('acceptSending/{id}', [AdminController::class, 'acceptSending']);
+    Route::delete('rejectSending/{id}', [AdminController::class, 'rejectSending']);
+    Route::get('waiting', [AdminController::class, 'waitingOrders']);
+    Route::get('sending', [AdminController::class, 'sendingOrders']);
+    Route::get('receiving', [AdminController::class, 'receivingOrders']);
+    Route::get('notifications', [AdminController::class, 'notifications']);
 });
+Route::get('/tes',function()
+{
+    Log::info('Publishing Kreait Laravel Firebase config');
+    $this->publishes([
+        __DIR__.'/path/to/config/firebase.php' => config_path('firebase.php'),
+    ]);
+}
+
+);

@@ -22,8 +22,6 @@ class Product extends Model
 
     public function cart()
     {
-        return $this->belongsToMany(User::class, 'cart')
-                    ->withPivot('total_amount', 'total_price', 'status')
-                    ->withTimestamps();
+        return $this->belongsToMany(User::class, 'cart');
     }
 }

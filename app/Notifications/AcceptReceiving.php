@@ -1,11 +1,10 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use App\Services\FCMService;
+use Krait\LaravelFirebase\Facades\Firebase;
 use Illuminate\Support\Facades\Log;
 
 class AcceptReceiving extends Notification implements ShouldQueue
@@ -13,62 +12,47 @@ class AcceptReceiving extends Notification implements ShouldQueue
     use Queueable;
 
     private $order_id;
-    private $store_name;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct($order_id, $store_name)
+    public function __construct($order_id)
     {
-        // Correctly assign values to the properties
         $this->order_id = $order_id;
-        $this->store_name = $store_name;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function via($notifiable): array
     {
-        return ['database', 'fcm']; // The 'fcm' channel here is custom and handled manually
+        return ['database', 'fcm']; // Adding custom FCM channel
     }
 
-    /**
-     * Handle FCM notification delivery.
-     *
-     * @param object $notifiable
-     * @return void
-     */
-    public function toFcm(object $notifiable)
+    public function toFcm($notifiable)
     {
-        $fcmToken = $notifiable->routeNotificationForFcm(); // Ensure this method exists in your User model
-        $fcmService = new FCMService();
+        $fcmToken = $notifiable->routeNotificationFor('fcm');
 
-        // Send the FCM notification
-        $response = $fcmService->sendNotification(
-            $fcmToken,
-            'Mate Order App',
-            "We accept receiving your order of Id: {$this->order_id} from store: {$this->store_name}",
-            ['order_id' => $this->order_id]
-        );
+        if (!$fcmToken) {
+            Log::warning("No FCM token found for user ID: {$notifiable->id}");
+            return;
+        }
 
-        // Log or handle the response for debugging
-        if (!$response['success'] ?? false) {
-            Log::error('FCM Notification Failed', ['response' => $response]);
+        try {
+            $response = Firebase::send([
+                'token' => $fcmToken,
+                'notification' => [
+                    'title' => 'Mate Order App',
+                    'body' => "We accept receiving your order of Id: {$this->order_id}",
+                ],
+                'data' => [
+                    'order_id' => $this->order_id,
+                ],
+            ]);
+            Log::info('FCM Notification Sent', ['response' => $response]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send FCM Notification', ['error' => $e->getMessage()]);
         }
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable): array
     {
         return [
-            'message' => "We accept recieving your order of Id: ".$this->order_id." from store: ".$this->store_name
+            'message' => "We accept receiving your order of Id: {$this->order_id}",
         ];
     }
 }
