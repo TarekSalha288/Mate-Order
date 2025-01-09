@@ -20,34 +20,10 @@ class AcceptReceiving extends Notification implements ShouldQueue
 
     public function via($notifiable): array
     {
-        return ['database', 'fcm']; // Adding custom FCM channel
+        return ['database']; // Adding custom FCM channel
     }
 
-    public function toFcm($notifiable)
-    {
-        $fcmToken = $notifiable->routeNotificationFor('fcm');
 
-        if (!$fcmToken) {
-            Log::warning("No FCM token found for user ID: {$notifiable->id}");
-            return;
-        }
-
-        try {
-            $response = Firebase::send([
-                'token' => $fcmToken,
-                'notification' => [
-                    'title' => 'Mate Order App',
-                    'body' => "We accept receiving your order of Id: {$this->order_id}",
-                ],
-                'data' => [
-                    'order_id' => $this->order_id,
-                ],
-            ]);
-            Log::info('FCM Notification Sent', ['response' => $response]);
-        } catch (\Exception $e) {
-            Log::error('Failed to send FCM Notification', ['error' => $e->getMessage()]);
-        }
-    }
 
     public function toArray($notifiable): array
     {

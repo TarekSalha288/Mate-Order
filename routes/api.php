@@ -109,12 +109,4 @@ Route::group([
     Route::get('receiving', [AdminController::class, 'receivingOrders']);
     Route::get('notifications', [AdminController::class, 'notifications']);
 });
-Route::get('/tes',function()
-{
-    Log::info('Publishing Kreait Laravel Firebase config');
-    $this->publishes([
-        __DIR__.'/path/to/config/firebase.php' => config_path('firebase.php'),
-    ]);
-}
 
-);

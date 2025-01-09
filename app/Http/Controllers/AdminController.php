@@ -115,6 +115,16 @@ class AdminController extends Controller
         $user = $order->user;
         if ($user)
             $user->notify(new AcceptReceiving($id));
+            if ($user->fcm_token) {
+                $title = 'Order Sending';
+                $body = 'Your order with ID ' . $id . ' has been sending ';
+                app('App\Services\FcmService')->sendNotification(
+                    $user->fcm_token,
+                    $title,
+                    $body,
+                    ['order_id' => $id]
+                );
+            }
         return response()->json(['message' => 'Accept receiving Order Of Id' . $id]);
     }
     public function rejectReceiving($id)
@@ -123,98 +133,83 @@ class AdminController extends Controller
         if (!$order || $order->status != 'sending') {
             return response()->json(['message' => 'Order not found'], 404);
         }
+$carts=$order->cart;
 
-        $owner = $order->store->user;
-        if ($owner->id !== auth()->id()) { // Check if the owner is the authenticated user
-            return response()->json(['message' => "You can't do that."], 403);
-        }
-
-        $store = $order->store;
-        if (!$store) {
-            return response()->json(['message' => 'Store not found'], 404);
-        }
+foreach($carts as $cart){
+ $product=$cart->product;
+$product->update(['amount'=>$product->amount + $cart->total_amount]);
+}
         $user = $order->user;
-
-        $product = $order->product;
-        $amount = $product->amount;
-        $amount += $order->total_amount;
-        $product->update(['amount' => $amount]);
         $order->delete();
-        if ($user)
-            $user->notify(new RejectReceiving($id, $store->store_name));
+        if ($user->fcm_token) {
+            $user->notify(new RejectReceiving($id));
+            $title = 'Order Reject Receiving';
+            $body = ' Sorry , Your order with ID ' . $id . ' Rejected ';
+            app('App\Services\FcmService')->sendNotification(
+                $user->fcm_token,
+                $title,
+                $body,
+                ['order_id' => $id]
+            );
+        }
+
         return response()->json(['message' => 'Reject receiving Order Of Id' . $id]);
     }
     public function acceptSending($id)
     {
         $order = Order::find($id);
         if (!$order || $order->status != 'waiting_accept') {
-            return response()->json(['message' => 'Order not found'], 404);
+            return response()->json(['message' => 'Order not found or not in "waiting_accept" status'], 404);
         }
         $order->update(['status' => 'sending']);
-$carts=$order->cart;
-foreach($carts as $cart){
-$cart->update(['status' => 'sending']);
-}
+        $carts = $order->cart;
+        foreach ($carts as $cart) {
+            $cart->update(['status' => 'sending']);
+        }
         $user = $order->user;
         if ($user) {
             $user->notify(new AcceptSending($id));
-
+            if ($user->fcm_token) {
+                $title = 'Order Accepted';
+                $body = 'Your order with ID ' . $id . ' has been accepted and is now being sent.';
+                app('App\Services\FcmService')->sendNotification(
+                    $user->fcm_token,
+                    $title,
+                    $body,
+                    ['order_id' => $id]
+                );
+            }
         }
         return response()->json(['message' => 'Accepted sending order of ID ' . $id]);
     }
 
+
     public function rejectSending($id)
     {
-
         $order = Order::find($id);
-
-        // Check if the order exists
-        if (!$order) {
+        if (!$order || $order->status != 'waiting_accept') {
             return response()->json(['message' => 'Order not found'], 404);
         }
+$carts=$order->cart;
 
-        // Access the related store
-        $store = $order->store;
-        if (!$store) {
-            return response()->json(['message' => 'Store not found'], 404);
-        }
-
-        // Access the store owner
-        $owner = $store->user;
-        if (!$owner || $owner->id !== auth()->id()) {
-            return response()->json(['message' => 'You can\'t do that'], 403);
-        }
-
-        // Access the order's user
+foreach($carts as $cart){
+ $product=$cart->product;
+$product->update(['amount'=>$product->amount + $cart->total_amount]);
+}
         $user = $order->user;
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        // Access the product related to the order
-        $product = $order->product;
-        if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
-        }
-
-        // Update product amount
-        $amount = $product->amount;
-        $totalAmount = $order->total_amount;
-
-        if (!is_numeric($amount) || !is_numeric($totalAmount)) {
-            return response()->json(['message' => 'Invalid amount data'], 422);
-        }
-
-        $product->update(['amount' => $amount + $totalAmount]);
-
-        // Delete the order
         $order->delete();
-
-        // Notify the user
-        $user->notify(new RejectSending($id, $store->store_name));
-
-        // Return response
-        return response()->json(['message' => 'Rejected sending order of ID ' . $id]);
+        if ($user->fcm_token) {
+            $user->notify(new RejectSending($id));
+            $title = 'Order Reject Sending';
+            $body = ' Sorry , Your order with ID ' . $id . ' Rejected ';
+            app('App\Services\FcmService')->sendNotification(
+                $user->fcm_token,
+                $title,
+                $body,
+                ['order_id' => $id]
+            );
+        }
+        return response()->json(['message' => 'Reject sending Order Of Id' . $id]);
     }
     public function notifications()
     {

@@ -6,11 +6,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
     public function register()
     {
+        // Delete any existing user with the same email before proceeding
+        User::where('email', request()->email)->whereNotNull('code')->delete();
         $validator = Validator::make(request()->all(), [
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
@@ -18,39 +20,26 @@ class AuthController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|confirmed|min:8',
         ]);
-
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-
-        // Check for expired unverified user
-        $existingUser = User::where('email', request()->email)->first();
-        if ($existingUser && optional($existingUser->expire_at)->isPast()) {
-            $existingUser->delete();
-        }
-
         $user = new User;
         $user->firstName = request()->firstName;
         $user->lastName = request()->lastName;
         $user->phone = request()->phone;
         $user->email = request()->email;
         $user->password = bcrypt(request()->password);
+        $user->fcm_token = request()->fcm_token;
         $user->save();
-
         $user->generateCode();
-
         $credentials = request(['phone', 'password']);
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
         Mail::to($user->email)->send(new TowFactorMail($user->code, $user->firstName));
-
-        $user->fcm_token = $token;
-        $user->save();
-
         return response()->json(['user' => $user, 'token' => $token], 201);
     }
+
 
     public function login()
     {
@@ -59,7 +48,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         $user=auth()->user();
-        $user->fcm_token=$token;
+        $user->fcm_token=request()->fcm_token;
         $user->save();
         return $this->respondWithToken($token);
     }

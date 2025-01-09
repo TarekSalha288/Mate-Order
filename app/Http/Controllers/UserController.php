@@ -165,14 +165,28 @@ class UserController extends Controller
     {
         $notifications = User::find(auth()->user()->id)->notifications;
         if ($notifications->isEmpty())
-            return response()->json(['message' => 'No  Notifications To Show']);
-        return response()->json($notifications, 200);
+            return response()->json(['message' => 'No  Notifications To Show'],400);
+        return response()->json(['data'=>$notifications], 200);
     }
     public function showFav()
     {
         $products = Auth::user()->products;
         if ($products->isEmpty())
-            return response()->json(['message' => 'No  Favorite Products To Show']);
-        return response()->json($products, 200);
+        return response()->json(['message' => 'No  Favorite Products To Show'],400);
+        $allProducts=[];
+        foreach($products as $product){
+            $owner=$product->store;
+            $fav = DB::table('favorite')
+            ->where('user_id', auth()->user()->id)
+            ->where('product_id', $product->id)
+            ->exists();
+            $product['owner'] = $owner->store_name;
+            $product['fav'] = $fav;
+            unset($product['store']);
+            $allProducts[] = [
+                'product' => $product,
+            ];
+        }
+        return response()->json(['data'=>$allProducts], 200);
     }
 }

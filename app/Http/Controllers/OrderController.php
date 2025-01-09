@@ -62,8 +62,10 @@ class OrderController extends Controller
 ////////////////////////////////////////////////////////////////////////////////
     public function updateOrder(Request $request, $order_id, $product_id)
     {
+        $newamount=0;
         $validator = Validator::make(request()->all(), [
             'total_amount' => 'required',
+            'new_amount'=>'required',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
@@ -71,16 +73,18 @@ class OrderController extends Controller
         $order=auth()->user()->orders()->where('status','waiting_accept')->where('id',$order_id)->first();
         if(!$order)
         return response()->json(['message'=>'Order Not Found'],400);
-    $cart=$order->cart()->where('status','waiting_accept')->where('product_id',$product_id)->first();
+    $cart=$order->cart->where('status','waiting_accept')->where('product_id',$product_id)->first();
 
     if(!$cart)
     return response()->json(['message'=>'Product Not Found'],400);
+
     $product=$cart->product;
     $price=$product->price;
-    $total_price=$price * $request->total_amount;
+
+    $total_price=$price * $request->new_amount;
         if(($request->total_amount) <= $product->amount ){
       $cart->update([
-        'total_amount'=>$request->total_amount,
+        'total_amount'=> $request->new_amount,
         'total_price'=>$total_price,
       ]);
 
