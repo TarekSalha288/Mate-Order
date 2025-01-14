@@ -63,9 +63,9 @@ class SuperUserController extends Controller
     public function getAllProductInStore(Request $request)
     {
         $user_id = auth()->user()->id;
-        $products = User::find($user_id)->store->products()->where('active', 1)->paginate(10);
+        $products = User::find($user_id)->store->products()->where('active', 1)->get();
         if (!$products) {
-            return response()->json(['data' => null, 'message' => 'get products failed'], 400);
+            return response()->json(['data' => null, 'message' => 'No products yet '], 400);
         }
         return response()->json(['data' => $products, 'message' => 'get products successfully'], 200);
     }

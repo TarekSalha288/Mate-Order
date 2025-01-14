@@ -36,13 +36,13 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="{{ asset('public/imgs/photo_2024-11-27_19-05-52.jpg') }}" alt="Mate Order Logo"
+            <img src="https://drive.google.com/u/1/drive-viewer/AKGpihYJtDcEEEe8kVuXnVnJu1ba6RqWvV-f1WkTx4Erw_Tdn9udRPPqMWTseAUPYC5PZ09zguYWVh_Z3M_JLDqObq1J4Pk7FA5NMw=s1600-rw-v1"  alt="Mate Order Logo"
             width="150">
         </div>
         <h1>Verify Your Account</h1>
-        <p>Hello {{$firstName}}</p>
+         <p>Hello {{$firstName}}</p>
         <p>We received a request to set up email for your account. Please use the following code to verify your email address:</p>
-        <div class="code">{{$code}}</div>
+         <div class="code">{{$code}}</div>
         <p>If you did not request this, please ignore this email.</p>
         <p>Thank you!</p>
     </div>
