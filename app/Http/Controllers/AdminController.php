@@ -115,16 +115,16 @@ class AdminController extends Controller
         $user = $order->user;
         if ($user)
             $user->notify(new AcceptReceiving($id));
-            if ($user->fcm_token) {
-                $title = 'Order Sending';
-                $body = 'Your order with ID ' . $id . ' has been sending ';
-                app('App\Services\FcmService')->sendNotification(
-                    $user->fcm_token,
-                    $title,
-                    $body,
-                    ['order_id' => $id]
-                );
-            }
+        if ($user->fcm_token) {
+            $title = 'Order Sending';
+            $body = 'Your order with ID ' . $id . ' has been sending ';
+            app('App\Services\FcmService')->sendNotification(
+                $user->fcm_token,
+                $title,
+                $body,
+                ['order_id' => $id]
+            );
+        }
         return response()->json(['message' => 'Accept receiving Order Of Id' . $id]);
     }
     public function rejectReceiving($id)
@@ -133,12 +133,12 @@ class AdminController extends Controller
         if (!$order || $order->status != 'sending') {
             return response()->json(['message' => 'Order not found'], 404);
         }
-$carts=$order->cart;
+        $carts = $order->cart;
 
-foreach($carts as $cart){
- $product=$cart->product;
-$product->update(['amount'=>$product->amount + $cart->total_amount]);
-}
+        foreach ($carts as $cart) {
+            $product = $cart->product;
+            $product->update(['amount' => $product->amount + $cart->total_amount]);
+        }
         $user = $order->user;
         $order->delete();
         if ($user->fcm_token) {
@@ -190,12 +190,12 @@ $product->update(['amount'=>$product->amount + $cart->total_amount]);
         if (!$order || $order->status != 'waiting_accept') {
             return response()->json(['message' => 'Order not found'], 404);
         }
-$carts=$order->cart;
+        $carts = $order->cart;
 
-foreach($carts as $cart){
- $product=$cart->product;
-$product->update(['amount'=>$product->amount + $cart->total_amount]);
-}
+        foreach ($carts as $cart) {
+            $product = $cart->product;
+            $product->update(['amount' => $product->amount + $cart->total_amount]);
+        }
         $user = $order->user;
         $order->delete();
         if ($user->fcm_token) {
@@ -219,13 +219,75 @@ $product->update(['amount'=>$product->amount + $cart->total_amount]);
         return response()->json($notifications, 200);
     }
 
-    public function waitingOrders()
-    {
-        $orders = Order::where('status', 'waiting_accept')->get();
-        if ($orders->isEmpty()) {
-            return response()->json(['message' => 'No Items To Show'], 404);
-        }
+    // public function waitingOrders()
+    // {
+    //     $orders = Order::where('status', 'waiting_accept')->get();
+    //     if ($orders->isEmpty()) {
+    //         return response()->json(['message' => 'No Items To Show'], 404);
+    //     }
 
+    //     $formattedOrders = $orders->map(function ($order) {
+    //         return [
+    //             'order_id' => $order->id,
+    //             'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
+    //             'phone_number' => $order->user->phone,
+    //             'total_amount' => $order->total_amount,
+    //             'total_price' => $order->total_price,
+    //             'address' => $order->address,
+    //             'products' => $order->cart,
+    //         ];
+    //     });
+
+    //     return response()->json($formattedOrders, 200);
+    // }
+
+    // public function sendingOrders()
+    // {
+    //     $orders = Order::where('status', 'sending')->get();
+    //     if ($orders->isEmpty()) {
+    //         return response()->json(['message' => 'No Items To Show'], 404);
+    //     }
+
+    //     $formattedOrders = $orders->map(function ($order) {
+    //         return [
+    //             'order_id' => $order->id,
+    //             'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
+    //             'phone_number' => $order->user->phone,
+    //             'total_amount' => $order->total_amount,
+    //             'total_price' => $order->total_price,
+    //             'address' => $order->address,
+    //             'products' => $order->cart,
+    //         ];
+    //     });
+
+    //     return response()->json($formattedOrders, 200);
+    // }
+    // public function receivingOrders()
+    // {
+    //     $orders = Order::where('status', 'receiving')->get();
+    //     if ($orders->isEmpty()) {
+    //         return response()->json(['message' => 'No Items To Show'], 404);
+    //     }
+    //     $formattedOrders = $orders->map(function ($order) {
+    //         return [
+    //             'order_id' => $order->id,
+    //             'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
+    //             'phone_number' => $order->user->phone,
+    //             'total_amount' => $order->total_amount,
+    //             'total_price' => $order->total_price,
+    //             'address' => $order->address,
+    //             'products' => $order->cart,
+    //         ];
+    //     });
+
+    //     return response()->json($formattedOrders, 200);
+    // }
+    public function allOrders()
+    {
+        $orders = Order::orderBy('status', 'desc')->get();
+
+        if ($orders->isEmpty())
+            return response()->json(['message' => 'No Orders Yet'], 400);
         $formattedOrders = $orders->map(function ($order) {
             return [
                 'order_id' => $order->id,
@@ -234,49 +296,7 @@ $product->update(['amount'=>$product->amount + $cart->total_amount]);
                 'total_amount' => $order->total_amount,
                 'total_price' => $order->total_price,
                 'address' => $order->address,
-                'products'=>$order->cart,
-            ];
-        });
-
-        return response()->json($formattedOrders, 200);
-    }
-
-    public function sendingOrders()
-    {
-        $orders = Order::where('status', 'sending')->get();
-        if ($orders->isEmpty()) {
-            return response()->json(['message' => 'No Items To Show'], 404);
-        }
-
-        $formattedOrders = $orders->map(function ($order) {
-            return [
-                'order_id' => $order->id,
-                'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
-                'phone_number' => $order->user->phone,
-                'total_amount' => $order->total_amount,
-                'total_price' => $order->total_price,
-                'address' => $order->address,
-                'products'=>$order->cart,
-            ];
-        });
-
-        return response()->json($formattedOrders, 200);
-    }
-    public function receivingOrders()
-    {
-        $orders = Order::where('status', 'receiving')->get();
-        if ($orders->isEmpty()) {
-            return response()->json(['message' => 'No Items To Show'], 404);
-        }
-        $formattedOrders = $orders->map(function ($order) {
-            return [
-                'order_id' => $order->id,
-                'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
-                'phone_number' => $order->user->phone,
-                'total_amount' => $order->total_amount,
-                'total_price' => $order->total_price,
-                'address' => $order->address,
-                'products'=>$order->cart,
+                'products' => $order->cart,
             ];
         });
 

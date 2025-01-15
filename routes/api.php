@@ -81,13 +81,13 @@ Route::group([
     Route::put('updateOrder/{order_id}/{product_id}', [OrderController::class, 'updateOrder']);
     Route::delete('deleteFromOrder/{order_id}/{product_id}', [OrderController::class, 'deleteFromOrder']);
     Route::delete('deleteOrder/{order_id}', [OrderController::class, 'deleteOrder']);
-    Route::get('userOrders',[OrderController::class,'orders']);
-    Route::get('editOrder/{id}',[OrderController::class,'edit']);
+    Route::get('userOrders', [OrderController::class, 'orders']);
+    Route::get('editOrder/{id}', [OrderController::class, 'edit']);
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    Route::post('create/{id}',[CartController::class,'create']);
-    Route::get('show',[CartController::class,'cart']);
-    Route::delete('delete/{id}',[CartController::class,'delete']);
-    Route::put('update/{id}',[CartController::class,'update']);
+    Route::post('create/{id}', [CartController::class, 'create']);
+    Route::get('show', [CartController::class, 'cart']);
+    Route::delete('delete/{id}', [CartController::class, 'delete']);
+    Route::put('update/{id}', [CartController::class, 'update']);
 });
 Route::group([
     'middleware' => [TowFactor::class, AdminMiddleWare::class, 'api', 'auth'],
@@ -104,9 +104,10 @@ Route::group([
     Route::delete('rejectReceiving/{id}', [AdminController::class, 'rejectReceiving']);
     Route::post('acceptSending/{id}', [AdminController::class, 'acceptSending']);
     Route::delete('rejectSending/{id}', [AdminController::class, 'rejectSending']);
-    Route::get('waiting', [AdminController::class, 'waitingOrders']);
-    Route::get('sending', [AdminController::class, 'sendingOrders']);
-    Route::get('receiving', [AdminController::class, 'receivingOrders']);
+    //Route::get('waiting', [AdminController::class, 'waitingOrders']);
+    //Route::get('sending', [AdminController::class, 'sendingOrders']);
+    //Route::get('receiving', [AdminController::class, 'receivingOrders']);
+    Route::get('orders', [AdminController::class, 'allOrders']);
     Route::get('notifications', [AdminController::class, 'notifications']);
 });
 
