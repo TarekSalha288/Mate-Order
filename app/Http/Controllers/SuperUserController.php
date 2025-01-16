@@ -135,20 +135,10 @@ class SuperUserController extends Controller
 
     public function archive()
     {
-        $products = User::find(auth()->user()->id)->store->products()->where('active', 0)->paginate(10);
+        $products = User::find(auth()->user()->id)->store->products()->where('active', 0)->get();
         if ($products->isEmpty())
-            return response()->json(['message' => 'No Items To Show']);
-        return response()->json([
-            'data' => $products,
-            'pagination' => [
-                'current_page' => $products->currentPage(),
-                'last_page' => $products->lastPage(),
-                'total' => $products->total(),
-                'per_page' => $products->perPage(),
-                'next_page_url' => $products->nextPageUrl(),
-                'prev_page_url' => $products->previousPageUrl(),
-            ],
-        ], 200);
+            return response()->json(['message' => 'No Items To Show'], 404);
+        return response()->json(['data' => $products,], 200);
 
     }
 
