@@ -32,10 +32,6 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        if ($request->email != $user->email) {
-            $user->generateCode();
-            Mail::to($user->email)->send(new TowFactorMail($user->code, $user->firstName));
-        }
         $user->update([
             'firstName' => $request->firstName,
             'lastName' => $request->lastName,
