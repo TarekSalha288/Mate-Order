@@ -139,7 +139,7 @@ return response()->json(['message'=>"Deleted $product->name From Order Id $order
     }
     public function orders()
     {
-     $orders=auth()->user()->orders()->orderBy('status','desc')->get();
+     $orders=auth()->user()->orders()->orderBy('status','desc')->orderByDesc('created_at')->get();
      if($orders->isEmpty())
      return response()->json(['message'=>'No Orders Yet'],400);
      return response()->json($orders);
