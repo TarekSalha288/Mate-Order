@@ -46,7 +46,7 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        $store = User::find($id)->first();
+        $store = Store::find($id)->first();
         if ($store) {
             Store::where('id', $id)->update([
                 'store_name' => request()->input('store_name'),
@@ -64,7 +64,7 @@ class AdminController extends Controller
     }
     public function deleteStore($id)
     {
-        $store = Store::findOrFail($id)->first();
+        $store = Store::find($id);
         if ($store) {
             $store->delete();
             return response()->json(['message' => 'Deleted Succssfully'], 200);
@@ -112,7 +112,12 @@ class AdminController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
         $order->update(['status' => 'receiving']);
+        $carts = $order->cart;
+        foreach ($carts as $cart) {
+            $cart->update(['status' => 'receiving']);
+        }
         $user = $order->user;
+
         if ($user)
             $user->notify(new AcceptReceiving($id));
         if ($user->fcm_token) {
@@ -219,69 +224,6 @@ class AdminController extends Controller
         return response()->json($notifications, 200);
     }
 
-    // public function waitingOrders()
-    // {
-    //     $orders = Order::where('status', 'waiting_accept')->get();
-    //     if ($orders->isEmpty()) {
-    //         return response()->json(['message' => 'No Items To Show'], 404);
-    //     }
-
-    //     $formattedOrders = $orders->map(function ($order) {
-    //         return [
-    //             'order_id' => $order->id,
-    //             'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
-    //             'phone_number' => $order->user->phone,
-    //             'total_amount' => $order->total_amount,
-    //             'total_price' => $order->total_price,
-    //             'address' => $order->address,
-    //             'products' => $order->cart,
-    //         ];
-    //     });
-
-    //     return response()->json($formattedOrders, 200);
-    // }
-
-    // public function sendingOrders()
-    // {
-    //     $orders = Order::where('status', 'sending')->get();
-    //     if ($orders->isEmpty()) {
-    //         return response()->json(['message' => 'No Items To Show'], 404);
-    //     }
-
-    //     $formattedOrders = $orders->map(function ($order) {
-    //         return [
-    //             'order_id' => $order->id,
-    //             'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
-    //             'phone_number' => $order->user->phone,
-    //             'total_amount' => $order->total_amount,
-    //             'total_price' => $order->total_price,
-    //             'address' => $order->address,
-    //             'products' => $order->cart,
-    //         ];
-    //     });
-
-    //     return response()->json($formattedOrders, 200);
-    // }
-    // public function receivingOrders()
-    // {
-    //     $orders = Order::where('status', 'receiving')->get();
-    //     if ($orders->isEmpty()) {
-    //         return response()->json(['message' => 'No Items To Show'], 404);
-    //     }
-    //     $formattedOrders = $orders->map(function ($order) {
-    //         return [
-    //             'order_id' => $order->id,
-    //             'user_name' => $order->user->firstName . ' ' . $order->user->lastName,
-    //             'phone_number' => $order->user->phone,
-    //             'total_amount' => $order->total_amount,
-    //             'total_price' => $order->total_price,
-    //             'address' => $order->address,
-    //             'products' => $order->cart,
-    //         ];
-    //     });
-
-    //     return response()->json($formattedOrders, 200);
-    // }
     public function allOrders()
     {
         $orders = Order::orderBy('status', 'desc')->get();
@@ -296,6 +238,7 @@ class AdminController extends Controller
                 'total_amount' => $order->total_amount,
                 'total_price' => $order->total_price,
                 'address' => $order->address,
+                'status'=>$order->status,
                 'products' => $order->cart,
             ];
         });
